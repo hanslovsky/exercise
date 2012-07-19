@@ -1,5 +1,8 @@
 #include "include/bTree.hxx"
 #include <iostream>
+#include <vector>
+#include <utility>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -12,6 +15,16 @@ int main() {
   cout << Tree2.getData(5) << endl;
   cout << Tree2.addData(3, 5) << endl;
   cout << Tree2.addData(3, 5) << endl;
+  cout << Tree2.getData(3) << endl;
   cout << Tree1.addData(1, 2) << endl;
-  cout << Tree1.getData(3) << endl;
+  cout << Tree1.getData(1) << endl;
+  for (int i = 0; i < 20; i++) {
+    Tree2.addData(rand(), rand());
+  }
+  vector<pair<int, int> > output;
+  Tree2.treeToVectorInOrder(output);
+  cout << "    blub    " << endl;
+  for (vector<pair<int, int> >::iterator it = output.begin(); it != output.end(); it++) {
+      cout << "Key: "<< it->first << ", Value: " << it->second << endl;
+  }
 }

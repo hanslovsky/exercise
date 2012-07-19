@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+#include <stack>
+#include <utility>
 
 template <class Key, class Data>
 class BTree {
@@ -23,7 +26,11 @@ public:
 
   bool addData(Key key, Data data);
   Data getData(Key key);
+  void treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output);
 };
+
+
+
 
 template <class Key, class Data>
 BTree<Key, Data>::BTree() : _root( NULL ) {} 
@@ -35,11 +42,11 @@ BTree<Key, Data>::BTree(Key key, Data data) {
 
 template <class Key, class Data>
 bool BTree<Key, Data>::addData(Key key, Data data) {
-  Node *node = _root;
-  if (node == NULL) {
-    node = new Node(key, data);
+  if (_root == NULL) {
+    _root = new Node(key, data);
     return true;
   }
+  Node *node = _root;
   while (true) {
     if (key == node->_key) {
       return false;
@@ -86,3 +93,29 @@ Data BTree<Key, Data>::getData(Key key) {
   }
   throw 1;
 }
+
+template <class Key, class Data>
+void BTree<Key, Data>::treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output) {
+  Node *node = _root;
+  std::stack<Node*> nodeStack;
+  while (true) {
+    if (node != NULL) {
+      nodeStack.push(node);
+      node = node->_left;
+    }
+    else {
+      if (nodeStack.empty()) {
+	break;
+      }
+      else {
+	node = nodeStack.top();
+	nodeStack.pop();
+	output.push_back(std::make_pair(node->_key, node->_data));
+	node = node->_right;
+      }
+    }
+  }
+}
+  
+
+
