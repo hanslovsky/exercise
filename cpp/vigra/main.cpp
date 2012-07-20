@@ -14,7 +14,7 @@ int main() {
     vigra::BRGBImage::Iterator dy = in.upperLeft();
     vigra::BRGBImage::Iterator end = in.lowerRight();
     vigra::BRGBImage::Iterator oy = out.upperLeft();
-    for (; dy.y != end.y; ++dy.y, ++oy.y) {
+    for (; dy.y != end.y && dy.y !=end.y-1; ++dy.y, ++oy.y) {
       vigra::BRGBImage::Iterator dx = dy;
       vigra::BRGBImage::Iterator ox = oy;
       for (; dx.x != end.x; ++dx.x, ++ox.x) {
