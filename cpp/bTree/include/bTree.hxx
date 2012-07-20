@@ -26,6 +26,7 @@ public:
 
   bool addData(Key key, Data data);
   Data getData(Key key);
+  int getDepth();
   void treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output);
 };
 
@@ -93,6 +94,27 @@ Data BTree<Key, Data>::getData(Key key) {
   }
   throw 1;
 }
+
+/*template <class Key, class Data>
+int Btree<Key, Data>::getDepth() {
+  int depth = 0;
+  Node *node = _root;
+  std::stack<Node*> nodeStack;
+  while (true) {
+    if (node != NULL) {
+      nodeStack.push(node);
+      node = node->left;
+    }
+    else {
+      if (nodeStack.empty()) {
+	break;
+      }
+      else node = nodeStack.top();
+      nodeStack.pop();
+    
+  }
+  if 
+  }*/
 
 template <class Key, class Data>
 void BTree<Key, Data>::treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output) {
