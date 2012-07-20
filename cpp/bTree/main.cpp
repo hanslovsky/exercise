@@ -28,4 +28,7 @@ int main() {
       cout << "Key: "<< it->first << ", Value: " << it->second << endl;
   }
   cout << Tree2.getDepth() << endl;
+  BTree<int, int>::Node* rt = Tree2.getRoot();
+  cout << rt->data_ << "  " << rt->left_->data_ << endl;
+  cout << Tree2.getDepth() << endl;
 }
