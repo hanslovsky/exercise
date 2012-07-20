@@ -6,15 +6,15 @@
 template <class Key, class Data>
 class BTree {
   struct Node {
-    Key _key;
-    Data _data;
-    Node *_left;
-    Node *_right;
+    Key key_;
+    Data data_;
+    Node *left_;
+    Node *right_;
     Node(Key key, Data data, Node* left = NULL, Node* right = NULL) :
-      _key(key),
-      _data(data),
-      _left(left),
-      _right(right)
+      key_(key),
+      data_(data),
+      left_(left),
+      right_(right)
     {}
     ~Node();
   };
@@ -49,26 +49,26 @@ bool BTree<Key, Data>::addData(Key key, Data data) {
   }
   Node *node = _root;
   while (true) {
-    if (key == node->_key) {
+    if (key == node->key_) {
       return false;
     }
     else {
-      if (key < node->_key) {
-	if (node->_left == NULL) {
-	  node->_left = new Node(key, data);
+      if (key < node->key_) {
+	if (node->left_ == NULL) {
+	  node->left_ = new Node(key, data);
 	  break;
 	}
 	else {
-	  node = node->_left;
+	  node = node->left_;
 	}
       }
       else {
-	if (node->_right == NULL) {
-	  node->_right = new Node(key, data);
+	if (node->right_ == NULL) {
+	  node->right_ = new Node(key, data);
 	  break;
 	}
 	else {
-	  node = node->_right;
+	  node = node->right_;
 	}
       }
     }
@@ -80,41 +80,48 @@ template <class Key, class Data>
 Data BTree<Key, Data>::getData(Key key) {
   Node *node = _root;
   while (node != NULL) {
-    if (key == node->_key) {
-      return node->_data;
+    if (key == node->key_) {
+      return node->data_;
     }
     else {
-      if (key < node->_key) {
-	node = node->_left;
+      if (key < node->key_) {
+	node = node->left_;
       }
       else {
-	node = node->_right;
+	node = node->right_;
       }
     }
   }
   throw 1;
 }
 
-/*template <class Key, class Data>
-int Btree<Key, Data>::getDepth() {
+template <class Key, class Data>
+int BTree<Key, Data>::getDepth() {
   int depth = 0;
   Node *node = _root;
+  Node *prev = NULL;
   std::stack<Node*> nodeStack;
-  while (true) {
-    if (node != NULL) {
-      nodeStack.push(node);
-      node = node->left;
+  nodeStack.push(node);
+  while (nodeStack.empty() == false) {
+    Node *curr = nodeStack.top();
+    if (prev == NULL || prev->left_ == curr || prev->right_ == curr) {
+      if (curr->left_)
+	nodeStack.push(curr->left_);
+      else if (curr->right_)
+	nodeStack.push(curr->right_);
     }
-    else {
-      if (nodeStack.empty()) {
-	break;
-      }
-      else node = nodeStack.top();
+    else if (curr->left_ == prev) {
+      if (curr->right_)
+	nodeStack.push(curr->right_);
+    }
+    else
       nodeStack.pop();
-    
+    prev = curr;
+    if (nodeStack.size() > depth)
+      depth = nodeStack.size();
   }
-  if 
-  }*/
+  return depth;
+}
 
 template <class Key, class Data>
 void BTree<Key, Data>::treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output) {
@@ -123,7 +130,7 @@ void BTree<Key, Data>::treeToVectorInOrder(std::vector<std::pair<Key, Data> > &o
   while (true) {
     if (node != NULL) {
       nodeStack.push(node);
-      node = node->_left;
+      node = node->left_;
     }
     else {
       if (nodeStack.empty()) {
@@ -132,8 +139,8 @@ void BTree<Key, Data>::treeToVectorInOrder(std::vector<std::pair<Key, Data> > &o
       else {
 	node = nodeStack.top();
 	nodeStack.pop();
-	output.push_back(std::make_pair(node->_key, node->_data));
-	node = node->_right;
+	output.push_back(std::make_pair(node->key_, node->data_));
+	node = node->right_;
       }
     }
   }

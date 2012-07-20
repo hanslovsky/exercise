@@ -27,4 +27,5 @@ int main() {
   for (vector<pair<int, int> >::iterator it = output.begin(); it != output.end(); it++) {
       cout << "Key: "<< it->first << ", Value: " << it->second << endl;
   }
+  cout << Tree2.getDepth() << endl;
 }
