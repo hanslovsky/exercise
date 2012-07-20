@@ -35,8 +35,12 @@ public:
   int getDepth();
   void treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output);
   Node* getRoot();
+  Node* getNode(Key key);
+  Node* getPrevious(Key key);
   virtual void reorder();
   virtual void balance();
+  bool rotateLeft(Key key);
+  bool rotateRight(Key key);
 };
 
 
@@ -53,12 +57,10 @@ BTree<Key, Data>::Node::~Node() {
       curr->left_ = 0;
       curr->right_ = 0;
       if (curr != this) {
-	// std::cout << "deleting Node " << curr->key_ << std::endl;
 	delete curr;
       }
     }
   }
-  // std::cout<< "deleting Node " << this->key_ << std::endl;
 }
 
 template <class Key, class Data>
@@ -185,11 +187,101 @@ typename BTree<Key, Data>::Node* BTree<Key, Data>::getRoot() {
 }
 
 template <class Key, class Data>
-BTree<Key, Data>::reorder() {
-  balance();
+typename BTree<Key, Data>::Node* BTree<Key, Data>::getNode(Key key) {
+  Node *node = root_;
+  while (node != 0) {
+    if (node->key_ == key) {
+      break;
+    }
+    if (key < node->key_) {
+      node = node->left_;
+    }
+    else {
+      node = node->right_;
+    }
+  }
+  return node;
 }
 
 template <class Key, class Data>
+typename BTree<Key, Data>::Node* BTree<Key, Data>::getPrevious(Key key) {
+  Node *node = root_;
+  Node *prev = 0;
+  while (node != 0) {
+    if (node->key_ == key) {
+      break;
+    }
+    prev = node;
+    if (key < node->key_) {
+      node = node->left_;
+    }
+    else {
+      node = node->right_;
+    }
+  }
+  if (node != 0) {
+    return prev;
+  }
+  else {
+    return 0;
+  }
+}
 
+template <class Key, class Data>
+void BTree<Key, Data>::reorder() {
+  balance();
+}
+template <class Key, class Data>
+void BTree<Key, Data>::balance() {
+}
 
+template <class Key, class Data>
+bool BTree<Key, Data>::rotateLeft(Key key) {
+  Node *prev = getPrevious(key);
+  Node *node = 0;
+  if (key < prev->key_)
+    node = prev->left_;
+  else
+    node = prev->right_;
+  if (node) {
+    if (node->right_ != 0) {
+      Node *temp = node->right_;
+      node->right_ = temp->left_;
+      temp->left_ = node;
+      if (key < prev->key_)
+	prev->left_ = temp;
+      else
+	prev->right_ = temp;
+    }
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
+template<class Key, class Data>
+bool BTree<Key, Data>::rotateRight(Key key) {
+  Node *prev = getPrevious(key);
+  Node *node = 0;
+  if (key < prev->key_)
+    node = prev->left_;
+  else
+    node = prev->right_;
+  if (node) {
+    if (node->left_ != 0) {
+      Node *temp = node->left_;
+      node->left_ = temp->right_;
+      temp->right_ = node;
+      if (key < prev->key_)
+	prev->left_ = temp;
+      else
+	prev->right_ = temp;
+    }
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
 #endif
