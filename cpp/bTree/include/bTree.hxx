@@ -35,6 +35,8 @@ public:
   int getDepth();
   void treeToVectorInOrder(std::vector<std::pair<Key, Data> > &output);
   Node* getRoot();
+  virtual void reorder();
+  virtual void balance();
 };
 
 
@@ -181,5 +183,13 @@ template <class Key, class Data>
 typename BTree<Key, Data>::Node* BTree<Key, Data>::getRoot() {
   return root_;
 }
+
+template <class Key, class Data>
+BTree<Key, Data>::reorder() {
+  balance();
+}
+
+template <class Key, class Data>
+
 
 #endif
