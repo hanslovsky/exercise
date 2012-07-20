@@ -132,7 +132,7 @@ Data BTree<Key, Data>::getData(Key key) {
 
 template <class Key, class Data>
 int BTree<Key, Data>::getDepth() {
-  int depth = 0;
+  unsigned int depth = 0;
   Node *node = root_;
   Node *prev = 0;
   std::stack<Node*> nodeStack;
