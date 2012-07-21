@@ -11,5 +11,7 @@ int main() {
   Complex c(1, -1);
   Complex d = b*3.0;
   cout << d.abs() << endl;
+  Mandelbrot brot;
+  brot.fillGrid();
   return 0;
 }

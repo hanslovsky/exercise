@@ -62,9 +62,13 @@ double Complex::getI() const {
   return y_;
 }
 
-double Complex::abs() const {
+double Complex::sqAbs() const {
   Complex prod = mult(conj());
-  return std::sqrt(prod.getR());
+  return prod.getR();
+}
+
+double Complex::abs() const {
+  return std::sqrt(sqAbs());
 }
 
 Complex Complex::operator-() const{

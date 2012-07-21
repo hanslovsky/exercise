@@ -34,6 +34,7 @@ public:
   
   double getR() const;
   double getI() const;
+  double sqAbs() const;
   double abs() const;
 
   Complex operator-() const;
