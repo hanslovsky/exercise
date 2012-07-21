@@ -6,12 +6,19 @@ using namespace std;
 
 int main() {
   Complex a(3, 4);
-  cout << a.abs() << endl;
   Complex b(1, 1);
   Complex c(1, -1);
-  Complex d = b*3.0;
-  cout << d.abs() << endl;
-  Mandelbrot brot;
+  // Complex d = b*3.0;
+  Complex e(1, 0);
+  Complex f(e.mult(e));
+  e = e*e;
+  //f = e.mult(e);
+  cout << f.getR() << " " << f.getI() << endl;
+  // cout << d.abs() << endl;
+  
+
+  Mandelbrot brot(-1.26, -1.245, 0.00, 0.03, 1000, 1000, 1000);
   brot.fillGrid();
+  brot.writeToFile("mandelbrot.csv");
   return 0;
 }

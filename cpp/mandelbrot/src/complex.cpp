@@ -14,7 +14,8 @@ Complex Complex::sub(const Complex &c) const {
 
 Complex Complex::mult(const Complex &c) const {
   double re = x_*c.getR() - y_*c.getI();
-  double im = y_*c.getI() - x_*c.getR();
+  double im = x_*c.getI() + y_*c.getR();
+  //std::cout << re << "  " << im << std::endl;
   return Complex(re, im);
 }
 
@@ -73,10 +74,6 @@ double Complex::abs() const {
 
 Complex Complex::operator-() const{
   return Complex(-x_, -y_);
-}
-
-Complex Complex::operator=(const Complex &c) const {
-  return c;
 }
 
 Complex Complex::operator+(const Complex &c) const {

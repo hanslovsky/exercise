@@ -14,4 +14,4 @@ main.o : main.cpp include/complex.hxx include/mandelbrot.hxx
 	$(CC) $(CFLAGS) -c main.cpp
 
 mandelbrot : main.o complex.o mandelbrot.o
-	$(CC) $(CLAGS) complex.o main.o $(LDFLAGS) -o mandelbrot
+	$(CC) $(CLAGS) complex.o mandelbrot.o main.o $(LDFLAGS) -o mandelbrot

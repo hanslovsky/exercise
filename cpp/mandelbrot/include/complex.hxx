@@ -45,8 +45,6 @@ public:
   Complex operator/(const Complex &c) const;
   Complex operator*(const double &scalar) const;
   Complex operator/(const double &scalar) const;
-
-  Complex operator=(const Complex &c) const;
 };
 
 #endif

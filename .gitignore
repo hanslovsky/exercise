@@ -1,3 +1,6 @@
 *~
 a.out
 *.o
+*.png
+*.csv
+*.pdf

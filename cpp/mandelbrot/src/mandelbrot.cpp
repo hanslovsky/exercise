@@ -25,25 +25,30 @@ void Mandelbrot::setIter(int maxIter) {
 }
 
 void Mandelbrot::fillGrid() {
-  grid_ = new std::vector<std::vector<double > >(stepsX_, std::vector<double> (stepsY_));
-  int stepSizeX = (xmax_ - xmin_)/stepsX_;
-  int stepSizeY = (ymax_ - ymin_)/stepsY_;
+  if (!grid_) {
+    delete grid_;
+    grid_ = 0;
+  }
+  grid_ = new std::vector<std::vector<double > >(stepsY_, std::vector<double> (stepsX_));
+  double stepSizeX = (xmax_ - xmin_)/stepsX_;
+  double stepSizeY = (ymax_ - ymin_)/stepsY_;
   for (int y = 0; y < stepsY_; y++) {
+    double im = ymin_ + y*stepSizeY;
     for (int x = 0; x < stepsX_; x++) {
       double re = xmin_ + x*stepSizeX;
-      double im = ymin_ + y*stepSizeY;
       Complex c(re, im);
       Complex z(0, 0);
       int iterations = maxIter_;
       while (iterations > 0) {
-	if (c.sqAbs() >= 4) {
+	if (z.sqAbs() >= 4) {
 	  break;
 	}
-	z = z*z + c;
+	z = z*z;
+	z = z + c;
 	iterations--;
       }
-      double gridValue = iterations/maxIter_;
-      grid_->at(x).at(y) = gridValue;
+      double gridValue = 1.0*iterations/maxIter_;
+      grid_->at(y).at(x) = gridValue;
     }
   }
 }
@@ -56,7 +61,7 @@ bool Mandelbrot::writeToFile(const char *filename) const {
   if (f.is_open()) {
     for (int y = 0; y < stepsY_; y++) {
       for (int x = 0; x < stepsX_; x++) {
-	f << grid_->at(x).at(y) << " ";
+	f << grid_->at(y).at(x) << " ";
       }
       f << "\n";
     }
