@@ -17,7 +17,7 @@ int main() {
   // cout << d.abs() << endl;
   
 
-  Mandelbrot brot(-1.26, -1.245, 0.00, 0.03, 1000, 1000, 1000);
+  Mandelbrot brot(-0.72, -0.7, 0.24, 0.26, 1000, 1000, 1000);
   brot.fillGrid();
   brot.writeToFile("mandelbrot.csv");
   return 0;
