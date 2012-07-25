@@ -1,6 +1,6 @@
 CC = c++
-CFLAGS = -Wall -g
-LDFLAGS =
+CFLAGS = -Wall -g -Iinclude
+LDFLAGS = -lvigraimpex
 
 all: mandelbrot
 

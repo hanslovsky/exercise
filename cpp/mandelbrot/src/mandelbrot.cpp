@@ -1,7 +1,9 @@
-#include "../include/mandelbrot.hxx"
-#include "../include/complex.hxx"
+#include <mandelbrot.hxx>
+#include <complex.hxx>
 #include <iostream>
 #include <fstream>
+#include <vigra/impex.hxx>
+
 
 Mandelbrot::~Mandelbrot() {
   if (!grid_)
@@ -24,31 +26,44 @@ void Mandelbrot::setIter(int maxIter) {
   maxIter_ = maxIter;
 }
 
+void Mandelbrot::setEnhance(uint enhance) {
+  enhance_ = enhance;
+}
+
 void Mandelbrot::fillGrid() {
+  if (enhance_ < 1) {
+    throw 1;
+  }
   if (!grid_) {
     delete grid_;
     grid_ = 0;
   }
-  grid_ = new std::vector<std::vector<double > >(stepsY_, std::vector<double> (stepsX_));
+  grid_ = new vigra::BImage(stepsX_, stepsY_);
+  vigra::BImage::Iterator ity = grid_->upperLeft();
+  vigra::BImage::Iterator end = grid_->lowerRight();
   double stepSizeX = (xmax_ - xmin_)/stepsX_;
   double stepSizeY = (ymax_ - ymin_)/stepsY_;
-  for (int y = 0; y < stepsY_; y++) {
+  Complex offset = offset_;
+  for (int y = 0; ity.y != end.y; ++y, ++ity.y) {
     double im = ymin_ + y*stepSizeY;
-    for (int x = 0; x < stepsX_; x++) {
+    Complex c(0, im);
+    vigra::BImage::Iterator itx = ity;
+    for (int x = 0; itx.x !=end.x; ++x, ++itx.x) {
       double re = xmin_ + x*stepSizeX;
-      Complex c(re, im);
-      Complex z(0, 0);
-      int iterations = maxIter_;
+      c.setR(re);
+      Complex z(re, im);
+      int iterations = maxIter_ - 1;
       while (iterations > 0) {
 	if (z.sqAbs() >= 4) {
 	  break;
 	}
 	z = z*z;
-	z = z + c;
+	z = z + c + offset;
 	iterations--;
       }
-      double gridValue = 1.0*iterations/maxIter_;
-      grid_->at(y).at(x) = gridValue;
+      double gridValue = (1.0*iterations)/maxIter_;
+      gridValue = 255*pow(gridValue, enhance_);
+      *itx = (uint)gridValue;
     }
   }
 }
@@ -59,16 +74,27 @@ bool Mandelbrot::writeToFile(const char *filename) const {
   }
   std::ofstream f(filename, std::ios::trunc);
   if (f.is_open()) {
-    for (int y = 0; y < stepsY_; y++) {
-      for (int x = 0; x < stepsX_; x++) {
-	f << grid_->at(y).at(x) << " ";
+    vigra::BImage::Iterator ity = grid_->upperLeft();
+    vigra::BImage::Iterator end = grid_->lowerRight();
+    for (; ity.y != end.y; ++ity.y) {
+      vigra::BImage::Iterator itx = ity;
+      for (; itx.x != end.x - 1; ++itx.x) {
+	f << (uint)*itx << " ";
       }
-      f << "\n";
+      ++itx.x;
+      f << (uint)*itx << "\n";
     }
     f.close();
   }
   else {
     return 0;
   }
+  return 1;
+}
+
+bool Mandelbrot::writeImage(const char *filename) const {
+  if (!grid_)
+    return 0;
+  exportImage(srcImageRange(*grid_), vigra::ImageExportInfo(filename));
   return 1;
 }

@@ -29,8 +29,7 @@ int main() {
   s.close();
   cout << r << endl;
   cout << "width=" << img.getSizeX() <<", height=" << img.getSizeY() << ", color type=" << img.getColorType() << endl;
-  //img.printPixels();
-  int *pa;
-  cout << pa << endl;
+  cout << "depth=" << img.getBitDepth() << ", channels=" << img.getChannels() << endl;
+  img.printPixels();
   return 0;
 }

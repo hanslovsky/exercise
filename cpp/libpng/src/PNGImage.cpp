@@ -67,26 +67,28 @@ void PNGImage::printPixels() {
   uint sizeY = getSizeY();
   uint bitDepth = getBitDepth();
   uint channels = getChannels();
-  uint stepSize =  bitDepth * channels / 8;
+  //  uint stepSize =  bitDepth * channels / 8;
   for (uint y = 0; y < sizeY; y++) {
-    for (uint x = 0; x < sizeX*stepSize; x += stepSize) {
+    for (uint x = 0; x < sizeX; x++) {
       double sum = 0;
       uint idx = y*sizeX + x;
       for (uint c = 0; c < channels; c++) {
-	for (uint d = 0; d < bitDepth/8; d ++) {
+	for (uint d = 0; d < bitDepth/8; d++) {
 	  // sum += pow(2, bitDepth/8 - d)*(uint)bitMap_[sizeX*y + x + c + d];
-	  uint kk = (uint)bitMap_[idx + c + d];
+	  uint kk = (int)bitMap_[idx + c + d];
 	  if (kk > 255) {
-	    std::cout << "x: " << x/stepSize << ", y: " << y << ", c: " << c;
+	    //std::cout << (int)bitMap_[0] << "  " << (int)bitMap_[1] << "  " << (int)bitMap_[2] << std::endl;
+	    //std::cout << (int)bitMap_[3] << "  " << (int)bitMap_[4] << "  " << (int)bitMap_[5] << std::endl;
+	    std::cout << "x: " << x << ", y: " << y << ", c: " << c;
 	    std::cout << ", d: " << d << "  " << kk << std::endl;
+	    //throw 1;
 	  }
 	}
       }
-      sum = sum/3;
+      sum = sum/channels;
       // if (sum > 255)
       // std::cout << "x: " << x/stepSize << ", y: " << y << "  " << sum << " " << std::endl;
     }
-    std::cout << std::endl;
   }
 }
 
@@ -162,6 +164,7 @@ bool readPNG(std::istream &s, PNGImage &img) {
   if (bitDepth == 16)
     png_set_strip_16(pngPtr);
 
+
   rowPtrs = new png_bytep[sizeY];
   data = new char[sizeX * sizeY * bitDepth * channels / 8];
   const uint stepLength = sizeX * bitDepth * channels / 8;
@@ -169,11 +172,11 @@ bool readPNG(std::istream &s, PNGImage &img) {
   img.pointBitMap(data);
   for (uint i = 0; i < sizeY; i++) {
     png_uint_32 q = i*stepLength;
-    std::cout << stepLength << " " << q << std::endl;
     rowPtrs[i] = (png_bytep)data + q;
   }
   png_read_image(pngPtr, rowPtrs);
   data = 0;
+  rowPtrs = 0;
   delete data;
   delete[] (png_bytep)rowPtrs;
   png_destroy_read_struct(&pngPtr, &infoPtr, (png_infopp)0);

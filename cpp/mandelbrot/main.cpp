@@ -1,6 +1,6 @@
 #include <iostream>
-#include "include/complex.hxx"
-#include "include/mandelbrot.hxx"
+#include <complex.hxx>
+#include <mandelbrot.hxx>
 
 using namespace std;
 
@@ -16,9 +16,15 @@ int main() {
   cout << f.getR() << " " << f.getI() << endl;
   // cout << d.abs() << endl;
   
-
-  Mandelbrot brot(-0.72, -0.7, 0.24, 0.26, 1000, 1000, 1000);
-  brot.fillGrid();
-  brot.writeToFile("mandelbrot.csv");
+  Complex offset(0,0);
+  Mandelbrot brot(-0.72, -0.7, 0.24, 0.26, 10000, 10000, 1000, offset, 4);
+  try {
+    brot.fillGrid();
+  }
+  catch(...) {
+    cout << "enhance < 1\n";
+  }
+  // brot.writeToFile("mandelbrot.csv");
+  brot.writeImage("test.png");
   return 0;
 }
