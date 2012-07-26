@@ -1,11 +1,8 @@
 CC = c++
 CFLAGS = -Wall -g -Iinclude
-LDFLAGS = -lvigraimpex
+LDFLAGS = -lvigraimpex -lparser -lcomplex
 
 all: mandelbrot
-
-complex.o: src/complex.cpp include/complex.hxx
-	$(CC) $(CFLAGS) -c src/complex.cpp
 
 mandelbrot.o: src/mandelbrot.cpp include/complex.hxx include/mandelbrot.hxx
 	$(CC) $(CFLAGS) -c src/mandelbrot.cpp
@@ -13,5 +10,5 @@ mandelbrot.o: src/mandelbrot.cpp include/complex.hxx include/mandelbrot.hxx
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
 
-mandelbrot: main.o complex.o mandelbrot.o
-	$(CC) $(CLAGS) complex.o mandelbrot.o main.o $(LDFLAGS) -o mandelbrot
+mandelbrot: main.o mandelbrot.o
+	$(CC) $(CLAGS) mandelbrot.o main.o $(LDFLAGS) -o mandelbrot
