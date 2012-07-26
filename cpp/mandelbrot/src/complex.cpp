@@ -9,7 +9,7 @@ Complex Complex::add(const Complex &c) const {
 }
 
 Complex Complex::sub(const Complex &c) const {
-  return add(-c);
+  return add(0+(-1.0*c));
 }
 
 Complex Complex::mult(const Complex &c) const {
@@ -21,7 +21,7 @@ Complex Complex::mult(const Complex &c) const {
 
 Complex Complex::div(const Complex &c) const {
   Complex num = mult(c.conj());
-  double den = c.abs();
+  double den = c.sqAbs();
   den = den*den;
   return num/den;
 }
@@ -36,6 +36,10 @@ Complex Complex::sub(const Complex &c1, const Complex &c2) {
 
 Complex Complex::mult(const Complex &c1, const Complex &c2) {
   return c1.mult(c2);
+}
+
+Complex Complex::div(const Complex&c1, const Complex &c2) {
+  return c1.div(c2);
 }
 
 void Complex::setR(double x) {
@@ -72,30 +76,64 @@ double Complex::abs() const {
   return std::sqrt(sqAbs());
 }
 
-Complex Complex::operator-() const{
+/*Complex Complex::operator-() const{
   return Complex(-x_, -y_);
+  }*/
+
+Complex& Complex::operator=(const Complex &c) {
+  if (this == &c)
+    return *this;
+  set(c.getR(), c.getI());
+  return *this;
 }
 
-Complex Complex::operator+(const Complex &c) const {
-  return add(c);
+Complex Complex::operator-() const {
+  return 0-*this;
 }
 
-Complex Complex::operator-(const Complex &c) const {
-  return sub(c);
+Complex operator+(const Complex &c1, const Complex &c2) {
+  return Complex::add(c1, c2);
 }
 
-Complex Complex::operator*(const Complex &c) const {
-  return mult(c);
+Complex operator-(const Complex &c1, const Complex &c2) {
+  return Complex::sub(c1, c2);
 }
 
-Complex Complex::operator/(const Complex &c) const {
-  return div(c);
+Complex operator*(const Complex &c1, const Complex &c2) {
+  return Complex::mult(c1, c2);
 }
 
-Complex Complex::operator*(const double &scalar) const {
-  return Complex(scalar*x_, scalar*y_);
+Complex operator/(const Complex &c1, const Complex &c2) {
+  return Complex::div(c1, c2);
 }
 
-Complex Complex::operator/(const double &scalar) const {
-  return Complex(x_/scalar, y_/scalar);
+Complex operator+(const Complex &c, const double &scalar) {
+  return Complex(c.x_+scalar, c.y_+scalar);
+}
+
+Complex operator-(const Complex &c, const double &scalar) {
+  return Complex(c.x_-scalar, c.y_-scalar);
+}
+
+Complex operator*(const Complex &c, const double &scalar) {
+  return Complex(scalar*c.x_, scalar*c.y_);
+}
+
+Complex operator/(const Complex &c, const double &scalar) {
+  return Complex(c.x_/scalar, c.y_/scalar);
+}
+
+Complex operator+(const double &scalar, const Complex &c) {
+  return c+scalar;
+}
+
+Complex operator-(const double &scalar, const Complex &c) {
+  return -c+scalar;
+}
+Complex operator*(const double &scalar, const Complex &c) {
+  return c*scalar;
+}
+
+Complex operator/(const double &scalar, const Complex &c) {
+  return Complex(scalar, 0)/c;
 }

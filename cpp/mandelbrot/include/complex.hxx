@@ -20,6 +20,7 @@ public:
   Complex sub(const Complex &c) const;
   Complex mult(const Complex &c) const;
   Complex div(const Complex &c) const;
+  Complex addScalar(const double &scalar);
 
   static Complex add(const Complex &c1, const Complex &c2);
   static Complex sub(const Complex &c1, const Complex &c2);
@@ -37,14 +38,24 @@ public:
   double sqAbs() const;
   double abs() const;
 
+  
+  Complex& operator=(const Complex &c);
   Complex operator-() const;
   
-  Complex operator+(const Complex &c) const;
-  Complex operator-(const Complex &c) const;
-  Complex operator*(const Complex &c) const;
-  Complex operator/(const Complex &c) const;
-  Complex operator*(const double &scalar) const;
-  Complex operator/(const double &scalar) const;
+  friend Complex operator+(const Complex &c1, const Complex &c2);
+  friend Complex operator-(const Complex &c1, const Complex &c2);
+  friend Complex operator*(const Complex &c1, const Complex &c2);
+  friend Complex operator/(const Complex &c1, const Complex &c2);
+
+  friend Complex operator+(const Complex &c, const double &scalar);
+  friend Complex operator-(const Complex &c, const double &scalar);
+  friend Complex operator*(const Complex &c, const double &scalar);
+  friend Complex operator/(const Complex &c, const double &scalar);
+
+  friend Complex operator+(const double &scalar, const Complex &c);
+  friend Complex operator-(const double &scalar, const Complex &c);
+  friend Complex operator*(const double &scalar, const Complex &c);
+  friend Complex operator/(const double &scalar, const Complex &c);
 };
 
 #endif
