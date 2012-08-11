@@ -7,10 +7,11 @@
 class img2ascii {
   vigra::BImage img_;
 public:
-  img2ascii();
   img2ascii(const char* imgPath);
   img2ascii(vigra::BImage& img);
-  
 };
+
+vigra::BImage rgb2gs(const vigra::BRGBImage& img);
+
 
 #endif
