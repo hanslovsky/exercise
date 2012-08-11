@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
   catch(...) {
     cout << "enhance < 1\n";
   }
-  // brot.writeToFile("mandelbrot.csv");
   brot.writeImage("test.png");
   return 0;
 }
