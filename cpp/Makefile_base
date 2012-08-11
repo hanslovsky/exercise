@@ -1,0 +1,10 @@
+CC = c++
+CFLAGS = -Wall -g -Iinclude
+LDFLAGS = -lvigraimpex -lparser -lcomplex
+
+all: 
+
+main.o: main.cpp
+	$(CC) $(CFLAGS) -c main.cpp
+
+clean:
