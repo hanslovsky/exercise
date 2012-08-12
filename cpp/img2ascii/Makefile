@@ -2,7 +2,7 @@ CC = c++
 CFLAGS = -Wall -g -Iinclude
 LDFLAGS = -lvigraimpex
 
-all:
+all: img2ascii
 
 img2ascii: main.o
 	$(CC) $(CFLAGS) img2ascii.o main.o $(LDFLAGS) -o img2ascii
