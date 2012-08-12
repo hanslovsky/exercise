@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-  img2ascii a("step3_circle.gif");
+  img2ascii a("bla.jpg");
   a.writeToFile("out.txt");
   return 0;
 }
