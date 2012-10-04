@@ -5,7 +5,9 @@
 #include <vigra/impex.hxx>
 #include <vector>
 
+#ifndef SYMBOLS
 #define SYMBOLS {' ', '.', ',', ':', ';', '+', '*', '&', '#', '%', '@'}
+#endif
 #define PATCHWIDTH 5
 #define PATCHHEIGHT 10
 
@@ -20,6 +22,8 @@ public:
   img2ascii(vigra::BImage& img);
   ~img2ascii();
   void writeToFile(const char* filePath);
+
+  vigra::BImage getImage();
 };
 
 vigra::BImage rgb2gs(vigra::BRGBImage& img);

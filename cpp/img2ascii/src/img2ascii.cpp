@@ -41,7 +41,10 @@ void img2ascii::writeToFile(const char* filePath) {
   }
   f.close();
 }
-  
+
+vigra::BImage img2ascii::getImage() {
+  return img_;
+}
 
 vigra::BImage rgb2gs(vigra::BRGBImage& RGBImg) {
   vigra::BImage GSImage(RGBImg.width(), RGBImg.height());
@@ -57,3 +60,5 @@ vigra::BImage rgb2gs(vigra::BRGBImage& RGBImg) {
   }
   return GSImage;
 }
+
+

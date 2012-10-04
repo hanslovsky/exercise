@@ -1,6 +1,6 @@
 CC = c++
 CFLAGS = -Wall -g -Iinclude
-LDFLAGS = -lvigraimpex -lopencv_core -lopencv_imgproc -lopencv_highgui
+LDFLAGS = -lopencv_core -lopencv_imgproc -lopencv_highgui
 
 all: img2ascii
 
