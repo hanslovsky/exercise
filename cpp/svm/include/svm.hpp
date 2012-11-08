@@ -22,16 +22,20 @@ private:
   T* features_;
   int* labels_;
   Solution s_;
+  // number of samples
   int n_;
+  // number of features
   int p_;
 public:
   SVM() : features_(0), labels_(0), n_(0), p_(0) {}
   SVM(T* features, int* labels, int n, int p);
   ~SVM();
   // n samples, p features
+  // labels must be from {-1, 1}
   void addData(T* features, int* labels, int n, int p);
   void trainSVM_primal(double C);
   void trainSVM_dual();
+  // using Radial Basis Functions (RBF)
   void trainSVM_RBF();
   Solution giveSolution() {return s_;}
 };
@@ -39,19 +43,17 @@ public:
 //
 template<typename T>
 SVM<T>::SVM(T* features, int* labels, int n, int p) :
-  features_(0),
-  labels_(0),
+  features_(features),
+  labels_(labels),
   n_(n),
   p_(p)
 {
-  addData(features, labels, n, p);
+
 }
 
 template<typename T>
 SVM<T>::~SVM() {
   if (features_!= 0) {
-    delete[] features_;
-    delete[] labels_;
     features_ = 0;
     labels_ = 0;
   }
@@ -60,13 +62,12 @@ SVM<T>::~SVM() {
 template<typename T>
 void SVM<T>::addData(T* features, int* labels, int n, int p) {
   if (features_!= 0) {
-    delete[] features_;
-    delete[] labels_;
     features_ = 0;
     labels_ = 0;
   }
-  
-  features_ = new T[n*p];
+  n_ = n;
+  p_ = p;
+  /* features_ = new T[n*p];
   labels_ = new int[n];
   for (int i = 0; i < n*p; i++) {
     features_[i] = features[i];
@@ -75,7 +76,9 @@ void SVM<T>::addData(T* features, int* labels, int n, int p) {
     if (labels[i] != -1 and labels[i] != 1)
       throw 20;
     labels_[i] = labels[i];
-  }
+    } */
+  features_ = features;
+  labels_ = labels;
 }
 
 

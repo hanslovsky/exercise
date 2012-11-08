@@ -1,6 +1,8 @@
 #include <svm.hpp>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <sstream>
 
 
 using namespace std;
@@ -8,12 +10,12 @@ using namespace std;
 
 int main() {
   int n = 8;
-  double data[n*2];
+  /* double data[n*2];
   int labels[n];
   for (int i = 0; i < 4; i++) {
     labels[i] = 1;
     labels[i+4] = -1;
-  }
+  } */
   /*
   data[0] = 1;
   data[1] = 0.9;
@@ -41,7 +43,7 @@ int main() {
   labels[8] = -1;
   labels[9] = 1; */
 
-  data[0] = 0.2;
+  /* data[0] = 0.2;
   data[1] = 1.0;
   data[2] = 4.0;
   data[3] = 2.8;
@@ -63,13 +65,63 @@ int main() {
   for (int i = 0; i < 2*n; i+=2) {
     of << data[i] << ";" << data[i+1] << "\n";
   }
-  of.close();
+  of.close(); */
+
+  ifstream trainingData("training_data.csv");
+
+  if ( !trainingData )
+    return 1;
+  string line;
+  int size = 0;
+
+  int nLines = 0;
+  while (getline(trainingData, line))
+    size++;
+  trainingData.clear();
+  trainingData.seekg(0);
+
+  double data[size*2];
+  int labels[size];
+
+  n = size;
+  size = 0;
+
+  while (getline(trainingData, line)) {
+    string::iterator it = line.begin();
+    string nbr = "";
+    stringstream tmp;
+    while (it != line.end()) {
+      int count = 0;
+      if (*it == ',' || *it == '\n') {
+	tmp << nbr;
+	nbr = "";
+	tmp >> data[size + count];
+	tmp.str("");
+	tmp.clear();
+	count++;
+      }
+      else {
+	nbr += *it;
+      }
+      it++;
+    }
+    tmp << nbr;
+    tmp >> labels[size];
+    if (labels[size] == 0) {
+      labels[size] = -1;
+    }
+    size++;
+    tmp.str("");
+    tmp.clear();
+  }
+
+  trainingData.close();
 
       
   
 
   SVM<double> svm(data, labels, n, 2);
-  svm.trainSVM_primal(0);
+  svm.trainSVM_primal(1.1);
   Solution s = svm.giveSolution();
   cout << s;  
   return 0;
