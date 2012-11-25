@@ -6,13 +6,14 @@
 using namespace std;
 
 int main() {
-  cout << getDecimalFraction(14) << "\n";
-  cout << getDigit(getDecimalFraction(14), 9) << "\n";
   int max = 6;
   string num = getDecimalFraction(pow(10,max));
+  int product = 1;
   for (int i = 0; i <= max; i++) {
-    cout << getDigit(num, pow(10, i)) << "  ";
+    int digit = getDigit(num, pow(10, i));
+    cout << digit  << "  ";
+    product *= digit;
   }
-  cout << "\n";
+  cout << "\n" << product << endl;
   return 0;
 }
