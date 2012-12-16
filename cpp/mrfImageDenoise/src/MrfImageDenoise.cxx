@@ -31,8 +31,8 @@ void NoisyImage::gaussianNoiseImage(double variance, double mean) {
   int N = noisyImage_->cols;
   // temporary: write original image in larger image for
   // the purpose of showing it later
-  cv::Mat large = cv::Mat::zeros(M+2, 2*N+3, CV_8UC1);
-  cv::Mat tmp = large(cv::Rect(1,1, N, M));
+  cv::Mat large = cv::Mat::zeros(M+4, 2*N+6, CV_8UC1);
+  cv::Mat tmp = large(cv::Rect(2,2, N, M));
   noisyImage_->convertTo(tmp, CV_8UC1);
   /* temporary */
   double* it = (double*) noisyImage_->data;
@@ -50,7 +50,7 @@ void NoisyImage::gaussianNoiseImage(double variance, double mean) {
   cv::imwrite("bla.png", *noisyImage_);
   cv::namedWindow("noisy image", CV_WINDOW_AUTOSIZE);
   cv::Mat_<unsigned char> a = cv::imread("bla.png", CV_LOAD_IMAGE_GRAYSCALE);
-  tmp = large(cv::Rect(N+2, 1, N, M));
+  tmp = large(cv::Rect(N+4, 2, N, M));
   a.copyTo(tmp);
   cv::imshow("noisy image", large);
   cv::waitKey(0);
