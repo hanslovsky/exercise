@@ -1,0 +1,2 @@
+add_library(MrfImageDenoising MrfImageDenoise.cxx)
+target_link_libraries(MrfImageDenoising opencv_core opencv_highgui)
