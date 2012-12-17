@@ -25,10 +25,10 @@ public:
   void writeImage(const char* fn);
 };
 
+
 double randomFromNormal(double mean = 0.0, double variance = 1.0);
 void randomVectorFromNormal(int N, double* numbers,
 		      double mean = 0.0, double variance = 1.0);
-
 
 
 // use functors to allow for various metrics
@@ -37,6 +37,9 @@ template <typename T, typename BinaryFn>
 double distance(T p1, T p2, BinaryFn metric) { // = lTwoSquared<double>()) {
   return metric(p1, p2);
 }
+
+
+// l2Squared
 
 template <typename T>
 class lTwoSquared {
