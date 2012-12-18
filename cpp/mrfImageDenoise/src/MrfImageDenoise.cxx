@@ -5,6 +5,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <cmath>
+
 NoisyImage::NoisyImage(const char* fn) : noisyImage_(0), denoisedImage_(0) {
   readImage(fn);
 }
@@ -42,9 +44,7 @@ void NoisyImage::gaussianNoiseImage(double variance, double mean) {
   cv::minMaxLoc(*noisyImage_, &min, &max);
   double range = max - min;
   *noisyImage_ = (*noisyImage_ - min)*(255.0/range);
-  // temporary: write noisy image
-  cv::imwrite("bla.png", *noisyImage_);
-  /* temporary */
+  *denoisedImage_ = noisyImage_->clone();
 }
 
 
@@ -75,12 +75,51 @@ void NoisyImage::showImages() {
 void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
   int M = im1->rows;
   int N = im1->cols;
+  int numberOfPixels = M*N;
+  cv::Mat changeFlags = cv::Mat::zeros(M, N, CV_8UC1);
   double nPixels = M*N;
   int count = 0;
-  double change = 10000000000.0;
+  double change = 0.0;
+  int index = 0;
+  double* d1 = (double*) im1->data;
+  double* d2 = (double*) im2->data;
+  unsigned char* flags = (unsigned char*) changeFlags.data;
+  double denominator = 1.0 + 4.0*lambda_;
   while (count < maxIter_) {
     change = 0.0;
+    for (int r = 1; r < M-1; r++) {
+      index = r*N;
+      for (int c = 1; c < N-1; c++) {
+
+
+	double old = *(d1 + index);
+	// rewrite to:
+	// if corner -> calculateCornerValue
+	// if edge -> calculateEdgeValue
+	// if regular -> calculateRegularValue
+	// also: include maximum penalty for smoothness violation
+	*(d2 + index) = (*(d2 + index) + lambda_ * (*(d2 + index + 1) +
+						   *(d2 + index - 1) +
+						   *(d2 + index + N) +
+						   *(d2 + index - N)));
+	*(d2 + index) /= denominator;
+	double localChange = abs(*(d2 + index) - old);
+	// end rewrite
+	change += localChange;
+	if (localChange > 1)
+	  *(flags + index) = 1;
+	else
+	  *(flags + index) = 0;
+	index++;
+      }
+    }
+    change /= (1.0*numberOfPixels);
+    if (change < epsilon_)
+      break;
+    count++;
   }
+  std::cout << change << "  " << epsilon_ << "\n";
+  std::cout << count << "\n";
 }
 
 

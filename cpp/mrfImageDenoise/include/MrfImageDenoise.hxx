@@ -67,7 +67,7 @@ class icmInfer {
   unsigned maxIter_;
   double epsilon_;
 public:
-  icmInfer(double lambda, unsigned maxIter, int epsilon) : \
+  icmInfer(double lambda, unsigned maxIter, double epsilon) : \
     lambda_(lambda), maxIter_(maxIter), epsilon_(epsilon) {}
   void operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2);
 };
