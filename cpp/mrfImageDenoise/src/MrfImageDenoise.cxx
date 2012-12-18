@@ -97,7 +97,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
 	// if corner -> calculateCornerValue
 	// if edge -> calculateEdgeValue
 	// if regular -> calculateRegularValue
-	// also: include maximum penalty for smoothness violation
+	// also: include maximum penalty for smoothing
 	*(d2 + index) = (*(d2 + index) + lambda_ * (*(d2 + index + 1) +
 						   *(d2 + index - 1) +
 						   *(d2 + index + N) +
