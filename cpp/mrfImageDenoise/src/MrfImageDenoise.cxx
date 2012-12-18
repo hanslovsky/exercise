@@ -72,6 +72,18 @@ void NoisyImage::showImages() {
 }
 
 
+void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
+  int M = im1->rows;
+  int N = im1->cols;
+  double nPixels = M*N;
+  int count = 0;
+  double change = 10000000000.0;
+  while (count < maxIter_) {
+    change = 0.0;
+  }
+}
+
+
 double randomFromNormal(double mean, double variance) {
   // create random number generator
   static boost::mt19937 rng(static_cast<unsigned> (time(0)));
