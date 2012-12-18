@@ -61,6 +61,17 @@ public:
   }
 };
 
+// binary functor implementing icm for inference
+class icmInfer {
+  double lambda_;
+  unsigned maxIter_;
+  double epsilon_;
+public:
+  icmInfer(double lambda, unsigned maxIter, int epsilon) : \
+    lambda_(lambda), maxIter_(maxIter), epsilon_(epsilon) {}
+  void operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2);
+};
+
 
 double randomFromNormal(double mean = 0.0, double variance = 1.0);
 void randomVectorFromNormal(int N, double* numbers,
