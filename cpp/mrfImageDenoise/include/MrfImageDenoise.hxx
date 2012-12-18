@@ -14,15 +14,51 @@
 class NoisyImage {
   cv::Mat_<double>* noisyImage_;
   cv::Mat_<double>* denoisedImage_;
-  void forumlate(double lambda);
 public:
   NoisyImage() : noisyImage_(0), denoisedImage_(0) {}
   NoisyImage(const char* fn);
   ~NoisyImage();
   void readImage(const char* fn);
   void gaussianNoiseImage(double variance = 1, double mean = 0);
-  void denoiseImage(double lambda = 1.0, int maxIter = 1000);
   void writeImage(const char* fn);
+  template <typename BinaryFn>
+  void infer(BinaryFn algorithm);
+  void showImages();
+};
+
+// arbitrary function can be used for inference
+// the user can specify the inference algorithm
+// the binary function takes two pointers to cv::Mat_<double>
+// as input arguments
+template <typename BinaryFn>
+void NoisyImage::infer(BinaryFn algorithm) {
+  if (noisyImage_ == 0) {
+    throw 2;
+  }
+  if (denoisedImage_ == 0) {
+    denoisedImage_ = new cv::Mat_<double>(noisyImage_->clone());
+  }
+  algorithm(noisyImage_, denoisedImage_);
+}
+
+
+// test binary functor that just produces two constant images
+class binaryFunctor {
+  double x1_;
+  double x2_;
+public:
+  binaryFunctor(double x1 = 85, double x2 = 170) : x1_(x1), x2_(x2) {
+    if (x1_ > 255)
+      x1_ = 85;
+    if (x2_ > 255)
+      x2_ = 170;
+  }
+  void operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
+    int rows = im1->rows;
+    int cols = im1->cols;
+    *im1 = cv::Mat::zeros(rows, cols, CV_64F) + x1_;
+    *im2 = cv::Mat::zeros(rows, cols, CV_64F) + x2_;
+  }
 };
 
 
