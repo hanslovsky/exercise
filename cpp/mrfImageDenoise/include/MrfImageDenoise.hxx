@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <opencv2/core/core.hpp>
+#include <list>
 
 
 
@@ -63,9 +64,25 @@ public:
 
 // binary functor implementing icm for inference
 class icmInfer {
+  // parameters
   double lambda_;
   unsigned maxIter_;
   double epsilon_;
+  // neighbors relative to requested pixel
+  int regular_[4];
+  int upperLeft_[2];
+  int lowerLeft_[2];
+  int lowerRight_[2];
+  int upperRight_[2];
+  int left_[3];
+  int lower_[3];
+  int right_[3];
+  int upper_[3];
+  // update pixel based on neighborhood and pixel value
+  double updatePixel(cv::Mat_<double>* im, cv::Mat& changeFlags, int r, int c);
+  double udpatePixelCore(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors);
+  // define neighbors as soon as dims of matrix are known
+  void defineNeighbors(int N);
 public:
   icmInfer(double lambda, unsigned maxIter, double epsilon) : \
     lambda_(lambda), maxIter_(maxIter), epsilon_(epsilon) {}
@@ -79,7 +96,6 @@ void randomVectorFromNormal(int N, double* numbers,
 
 
 // use functors to allow for various metrics
-
 template <typename T, typename BinaryFn>
 double distance(T p1, T p2, BinaryFn metric) { // = lTwoSquared<double>()) {
   return metric(p1, p2);
@@ -87,7 +103,6 @@ double distance(T p1, T p2, BinaryFn metric) { // = lTwoSquared<double>()) {
 
 
 // l2Squared
-
 template <typename T>
 class lTwoSquared {
 public:

@@ -6,6 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include <cmath>
+#include <list>
 
 NoisyImage::NoisyImage(const char* fn) : noisyImage_(0), denoisedImage_(0) {
   readImage(fn);
@@ -72,9 +73,76 @@ void NoisyImage::showImages() {
 }
 
 
+double icmInfer::updatePixel(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, int r) {
+  int M = im->rows;
+  int N = im->cols;
+  std::list<int> neighbors;
+  if (r == 0) {
+    if (c == 0) {
+      neighbors = std::list<int>(upperLeft_, upperLeft_ + 2);
+    } else if (c == N-1) {
+      neighbors = std::list<int>(upperRight_, upperRight_ + 2);
+    } else {
+      neighbors = std::list<int>(upper_, upper_ + 3);
+    }
+  } else if ( r == M-1) {
+    if (c == 0) {
+      neighbors = std::list<int>(lowerLeft_, lowerLeft_ + 2);
+    }
+    if (c == N-1) {
+      neighbors = std::list<int>(lowerRight_, lowerRight_ + 2);
+    }
+    else {
+      neighbors = std::list<int>(lower_, lower_ + 3);
+    }
+  } else if (c ==0) {
+    neighbors = std::list<int>(left_, left_ + 3);
+  } else if (c == N-1) {
+    neighbors = std::list<int>(right_, right_ + 3);
+  } else {
+    neighbors = std::list<int>(regular_, regular_ + 4);
+  }
+  return udpatePixelCore(im, changeFlags, c, r, neighbors);
+}
+
+
+
+double icmInfer::udpatePixelCore(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors) {
+  int M = im->rows;
+  int N = im->cols;
+  int nNeighbors = neighbors.size();
+  double* data = (double*) im->data;
+  double squaredDiffs = 0.0;
+  double oldPixelValue = *(data + r*N + c);
+  double newPixelValue = lambda_ *oldPixelValue;
+  for (std::list<int>::iterator it = neighbors.begin(); it != neighbors.end(); it++) {
+    squaredDiffs += *(data + r*N + c + *it);
+  }
+  newPixelValue += squaredDiffs;
+  newPixelValue /= (lambda_ + nNeighbors);
+  *(data + r*N + c) = newPixelValue;
+  return newPixelValue - oldPixelValue;
+}
+  
+
+void icmInfer::defineNeighbors(int N) {
+  regular_[0] = 1, regular_[1] = -1, regular_[2] = N, regular_[3] = -N;
+  upperLeft_[0] = 1, upperLeft_[1] = N;
+  lowerLeft_[0] = 1, lowerLeft_[1] = -N;
+  lowerRight_[0] = -1, lowerRight_[1] = -N;
+  upperRight_[0] = -1, upperRight_[1] = N;
+  left_[0] = 1, left_[1] = N, left_[2] = -N;
+  lower_[0] = 1, lower_[1] = -1, lower_[2] = -N;
+  right_[0] = -1, right_[1] = N, right_[2] = -N;
+  upper_[0] = 1, upper_[1] = -1, upper_[2] = N;
+}
+  
+				 
+
 void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
   int M = im1->rows;
   int N = im1->cols;
+  defineNeighbors(N);
   int numberOfPixels = M*N;
   cv::Mat changeFlags = cv::Mat::zeros(M, N, CV_8UC1);
   double nPixels = M*N;
@@ -92,7 +160,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
       for (int c = 1; c < N-1; c++) {
 
 
-	double old = *(d1 + index);
+	double old = *(d2 + index);
 	// rewrite to:
 	// if corner -> calculateCornerValue
 	// if edge -> calculateEdgeValue
@@ -104,6 +172,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
 						   *(d2 + index - N)));
 	*(d2 + index) /= denominator;
 	double localChange = abs(*(d2 + index) - old);
+	// double localChange = abs(updatePixel(im2, changeFlags, c, r));
 	// end rewrite
 	change += localChange;
 	if (localChange > 1)
