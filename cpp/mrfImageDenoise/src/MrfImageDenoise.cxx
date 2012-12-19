@@ -8,6 +8,8 @@
 #include <cmath>
 #include <list>
 
+#include <ctime>
+
 NoisyImage::NoisyImage(const char* fn) : noisyImage_(0), denoisedImage_(0) {
   readImage(fn);
 }
@@ -73,10 +75,8 @@ void NoisyImage::showImages() {
 }
 
 
-double icmInfer::updatePixel(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, int r) {
-  int M = im->rows;
-  int N = im->cols;
-  std::list<int> neighbors;
+double icmInfer::updatePixel(double* im, cv::Mat& changeFlags, int c, int r, int M, int N) {
+  std::list<int> neighbors(4,0);
   if (r == 0) {
     if (c == 0) {
       neighbors = std::list<int>(upperLeft_, upperLeft_ + 2);
@@ -101,27 +101,29 @@ double icmInfer::updatePixel(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, 
     neighbors = std::list<int>(right_, right_ + 3);
   } else {
     neighbors = std::list<int>(regular_, regular_ + 4);
-  }
-  return udpatePixelCore(im, changeFlags, c, r, neighbors);
+    } 
+  return udpatePixelCore(im, changeFlags, c, r, neighbors, N);
 }
 
 
 
-double icmInfer::udpatePixelCore(cv::Mat_<double>* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors) {
-  int M = im->rows;
-  int N = im->cols;
+double icmInfer::udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors, int N) {
+  
+  int index = r*N + c;
   int nNeighbors = neighbors.size();
-  double* data = (double*) im->data;
-  double squaredDiffs = 0.0;
-  double oldPixelValue = *(data + r*N + c);
-  double newPixelValue = lambda_ *oldPixelValue;
+  double* data = im;
+  double neighborSum = 0.0;
+  double* pixel = data + index;
+  double oldPixelValue = *pixel;
+  *pixel *= lambda_;
   for (std::list<int>::iterator it = neighbors.begin(); it != neighbors.end(); it++) {
-    squaredDiffs += *(data + r*N + c + *it);
+     *pixel += *(pixel + *it);
   }
-  newPixelValue += squaredDiffs;
-  newPixelValue /= (lambda_ + nNeighbors);
-  *(data + r*N + c) = newPixelValue;
-  return newPixelValue - oldPixelValue;
+  *pixel /= (lambda_ + nNeighbors);
+  data = 0;
+  double n = *pixel;
+  pixel = 0;
+  return  n - oldPixelValue;
 }
   
 
@@ -160,7 +162,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
       for (int c = 1; c < N-1; c++) {
 
 
-	double old = *(d2 + index);
+	/* double old = *(d2 + index);
 	// rewrite to:
 	// if corner -> calculateCornerValue
 	// if edge -> calculateEdgeValue
@@ -171,10 +173,13 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
 						   *(d2 + index + N) +
 						   *(d2 + index - N)));
 	*(d2 + index) /= denominator;
-	double localChange = abs(*(d2 + index) - old);
-	// double localChange = abs(updatePixel(im2, changeFlags, c, r));
+	double localChange = abs(*(d2 + index) - old); */
+	
+	double tmp = updatePixel(d2, changeFlags, c, r, M, N);
+	double localChange = abs(tmp);
+	
 	// end rewrite
-	change += localChange;
+	// change += localChange;
 	if (localChange > 1)
 	  *(flags + index) = 1;
 	else
@@ -187,6 +192,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
       break;
     count++;
   }
+  
   std::cout << change << "  " << epsilon_ << "\n";
   std::cout << count << "\n";
 }
