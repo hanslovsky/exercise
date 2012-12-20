@@ -12,9 +12,11 @@
 // idea taken from http://www.cs.toronto.edu/~fleet/courses/2503/fall11/Handouts/mrf.pdf
 // also provides function to put noise on image
 
+typedef unsigned char uchar;
+
 class NoisyImage {
-  cv::Mat_<double>* noisyImage_;
-  cv::Mat_<double>* denoisedImage_;
+  cv::Mat_<uchar>* noisyImage_;
+  cv::Mat_<uchar>* denoisedImage_;
 public:
   NoisyImage() : noisyImage_(0), denoisedImage_(0) {}
   NoisyImage(const char* fn);
@@ -37,7 +39,7 @@ void NoisyImage::infer(BinaryFn algorithm) {
     throw 2;
   }
   if (denoisedImage_ == 0) {
-    denoisedImage_ = new cv::Mat_<double>(noisyImage_->clone());
+    denoisedImage_ = new cv::Mat_<uchar>(noisyImage_->clone());
   }
   algorithm(noisyImage_, denoisedImage_);
 }
@@ -54,7 +56,7 @@ public:
     if (x2_ > 255)
       x2_ = 170;
   }
-  void operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
+  void operator() (cv::Mat_<uchar>* im1, cv::Mat_<uchar>* im2) {
     int rows = im1->rows;
     int cols = im1->cols;
     *im1 = cv::Mat::zeros(rows, cols, CV_64F) + x1_;
@@ -79,14 +81,14 @@ class icmInfer {
   int right_[3];
   int upper_[3];
   // update pixel based on neighborhood and pixel value
-  double updatePixel(double* im, cv::Mat& changeFlags, int r, int c, int M, int N);
-  double udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, int* neighborList, int N, int nNeigbors);
+  uchar updatePixel(uchar* im, cv::Mat& changeFlags, int r, int c, int M, int N);
+  uchar udpatePixelCore(uchar* im, cv::Mat& changeFlags, int c, int r, int* neighborList, int N, int nNeigbors);
   // define neighbors as soon as dims of matrix are known
   void defineNeighbors(int N);
 public:
   icmInfer(double lambda, unsigned maxIter, double epsilon) : \
     lambda_(lambda), maxIter_(maxIter), epsilon_(epsilon) {}
-  void operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2);
+  void operator() (cv::Mat_<uchar>* im1, cv::Mat_<uchar>* im2);
 };
 
 

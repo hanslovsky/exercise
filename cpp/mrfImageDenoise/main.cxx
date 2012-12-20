@@ -8,7 +8,7 @@ int main() {
   NoisyImage im("map.png");
   im.gaussianNoiseImage(100, 0);
 
-  binaryFunctor binFn;
+  // binaryFunctor binFn;
   icmInfer icm(0.1, 1000, 0.0001);
   im.infer<icmInfer>(icm);
   // im.infer<binaryFunctor>(binFn);
