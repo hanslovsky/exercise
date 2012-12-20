@@ -9,7 +9,7 @@ int main() {
   im.gaussianNoiseImage(100, 0);
 
   // binaryFunctor binFn;
-  icmInfer icm(0.1, 1000, 0.0001);
+  icmInfer icm(0.1, 1000, 0.0005);
   im.infer<icmInfer>(icm);
   // im.infer<binaryFunctor>(binFn);
   
