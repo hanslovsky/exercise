@@ -76,51 +76,58 @@ void NoisyImage::showImages() {
 
 
 double icmInfer::updatePixel(double* im, cv::Mat& changeFlags, int c, int r, int M, int N) {
-  std::list<int> neighbors(4,0);
+  int nNeighbors = 0;
+  int *neighborList = 0;
   if (r == 0) {
     if (c == 0) {
-      neighbors = std::list<int>(upperLeft_, upperLeft_ + 2);
+      nNeighbors = 2;
+      neighborList = upperLeft_;
     } else if (c == N-1) {
-      neighbors = std::list<int>(upperRight_, upperRight_ + 2);
+      nNeighbors = 2;
+      neighborList = upperRight_;
     } else {
-      neighbors = std::list<int>(upper_, upper_ + 3);
+      nNeighbors = 3;
+      neighborList = upper_;
     }
   } else if ( r == M-1) {
     if (c == 0) {
-      neighbors = std::list<int>(lowerLeft_, lowerLeft_ + 2);
+      nNeighbors = 2;
+      neighborList = lowerLeft_;
     }
     if (c == N-1) {
-      neighbors = std::list<int>(lowerRight_, lowerRight_ + 2);
+      nNeighbors = 2;
+      neighborList = lowerRight_;
     }
     else {
-      neighbors = std::list<int>(lower_, lower_ + 3);
+      nNeighbors = 3;
+      neighborList = lower_;
     }
   } else if (c ==0) {
-    neighbors = std::list<int>(left_, left_ + 3);
+    nNeighbors = 3;
+    neighborList = left_;
   } else if (c == N-1) {
-    neighbors = std::list<int>(right_, right_ + 3);
+    nNeighbors =3;
+    neighborList = right_;
   } else {
-    neighbors = std::list<int>(regular_, regular_ + 4);
+    nNeighbors = 4;
+    neighborList = regular_;
     } 
-  return udpatePixelCore(im, changeFlags, c, r, neighbors, N);
+  return udpatePixelCore(im, changeFlags, c, r, neighborList, N, nNeighbors);
 }
 
 
 
-double icmInfer::udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors, int N) {
+double icmInfer::udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, int* neighborList, int N, int nNeighbors) {
   
   int index = r*N + c;
-  int nNeighbors = neighbors.size();
-  double* data = im;
   double neighborSum = 0.0;
-  double* pixel = data + index;
+  double* pixel = im + index;
   double oldPixelValue = *pixel;
   *pixel *= lambda_;
-  for (std::list<int>::iterator it = neighbors.begin(); it != neighbors.end(); it++) {
-     *pixel += *(pixel + *it);
+  for (int i = 0; i < nNeighbors; i++, neighborList++) {
+     *pixel += *(pixel + *neighborList);
   }
   *pixel /= (lambda_ + nNeighbors);
-  data = 0;
   double n = *pixel;
   pixel = 0;
   return  n - oldPixelValue;
@@ -157,9 +164,9 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
   double denominator = 1.0 + 4.0*lambda_;
   while (count < maxIter_) {
     change = 0.0;
-    for (int r = 1; r < M-1; r++) {
+    for (int r = 0; r < M; r++) {
       index = r*N;
-      for (int c = 1; c < N-1; c++) {
+      for (int c = 0; c < N; c++) {
 
 
 	/* double old = *(d2 + index);
@@ -179,7 +186,7 @@ void icmInfer::operator() (cv::Mat_<double>* im1, cv::Mat_<double>* im2) {
 	double localChange = abs(tmp);
 	
 	// end rewrite
-	// change += localChange;
+	change += localChange;
 	if (localChange > 1)
 	  *(flags + index) = 1;
 	else

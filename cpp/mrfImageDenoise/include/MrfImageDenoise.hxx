@@ -80,7 +80,7 @@ class icmInfer {
   int upper_[3];
   // update pixel based on neighborhood and pixel value
   double updatePixel(double* im, cv::Mat& changeFlags, int r, int c, int M, int N);
-  double udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, std::list<int> neighbors, int N);
+  double udpatePixelCore(double* im, cv::Mat& changeFlags, int c, int r, int* neighborList, int N, int nNeigbors);
   // define neighbors as soon as dims of matrix are known
   void defineNeighbors(int N);
 public:
