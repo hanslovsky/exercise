@@ -131,10 +131,8 @@ uchar icmInfer::udpatePixelCore(uchar* im, cv::Mat& changeFlags, int r, int c, i
      newPixelValue += *(pixel + *neighborList);
   }
   newPixelValue /= (lambda_ + nNeighbors);
-  double n = *pixel;
-  *pixel = (uchar) newPixelValue;
   pixel = 0;
-  return  newPixelValue - oldPixelValue;
+  return  newPixelValue;
 }
   
 
@@ -158,11 +156,12 @@ void icmInfer::operator() (cv::Mat_<uchar>* im1, cv::Mat_<uchar>* im2) {
   defineNeighbors(N);
   int numberOfPixels = M*N;
   cv::Mat changeFlags = cv::Mat::zeros(M, N, CV_8UC1);
+  cv::Mat_<uchar> oldValues = im2->clone();
   double nPixels = M*N;
   int count = 0;
   double change = 0.0;
   int index = 0;
-  uchar* d1 = (uchar*) im1->data;
+  uchar* d1 = (uchar*) oldValues.data;
   uchar* d2 = (uchar*) im2->data;
   unsigned char* flags = (unsigned char*) changeFlags.data;
   double denominator = 1.0 + 4.0*lambda_;
@@ -185,9 +184,9 @@ void icmInfer::operator() (cv::Mat_<uchar>* im1, cv::Mat_<uchar>* im2) {
 						   *(d2 + index - N)));
 	*(d2 + index) /= denominator;
 	uchar localChange = abs(*(d2 + index) - old); */
-	uchar tmp = updatePixel(d2, changeFlags, r, c, M, N);
-	uchar localChange = abs(tmp);
-	
+	uchar tmp = updatePixel(d1, changeFlags, r, c, M, N);
+	uchar localChange = abs(tmp - *(d1 + index));
+	*(d2 + index) = tmp;
 	// end rewrite
 	change += localChange;
 	if (localChange > 0)
@@ -196,6 +195,7 @@ void icmInfer::operator() (cv::Mat_<uchar>* im1, cv::Mat_<uchar>* im2) {
 	*(flags + index) = 0;
 	index++;
       }
+      im2->copyTo(oldValues);
     }
     change /= (1.0*numberOfPixels);
     if (change < epsilon_)
