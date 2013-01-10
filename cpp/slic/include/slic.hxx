@@ -66,10 +66,7 @@ double KMeans<T, Distance>::infer(T* data, int nSamples, int nDim, int* labels, 
   double minDist;
   double dist;
   int minc;
-  T* tmp = 0;
-  // std::cout << k_ << "\n";
-  // std::cout << k_ << std::endl;
-  // std::cout << "bla" << std::endl;
+  T* tmp;
   for (int i = 0; i < nSamples; i++) {
     minDist = 10000000.0;
     minc = 0;
@@ -79,14 +76,11 @@ double KMeans<T, Distance>::infer(T* data, int nSamples, int nDim, int* labels, 
       dist = metric_(cluster, tmp, nDim);
       if (dist < minDist) {
 	minDist = dist;
-	//std::cout << "close " << c << std::endl;
-
-
-	
 	*(labels + i) = c;
       }
     }
   }
+  tmp = 0;
   return 3.0;
 }
 
@@ -102,7 +96,7 @@ public:
 template <typename T>
 class L2SquaredArray {
 public:
-  double operator()(T* p1, T* p2, int n) {
+  double operator()(T*& p1, T*& p2, int n) {
     double sum = 0.0;
     for (int i = 0; i < n; i++, p1++, p2++) {
       sum += (*p2 - *p1)*(*p2 - *p1);
