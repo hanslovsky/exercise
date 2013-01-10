@@ -45,7 +45,7 @@ void KMeans<T, Distance>::initializeRandom(int* randNumbers, int max) {
       if (!std::binary_search(randNumbers, randNumbers + k_, number))
 	break;
     }
-    randNumbers[i] = number;
+    *(randNumbers + i) = number;
   }
   return;
 }
@@ -54,8 +54,7 @@ void KMeans<T, Distance>::initializeRandom(int* randNumbers, int max) {
 
 template <typename T, typename Distance>
 double KMeans<T, Distance>::infer(T* data, int nSamples, int nDim, int* labels, T* centers, int initialize) {
-  switch(initialize) {
-  case 0:
+  if (initialize == 0) {
     int randIndices[k_];
     initializeRandom(randIndices, nSamples - 1);
     for (int i = 0; i < k_; i++) {
@@ -81,6 +80,7 @@ double KMeans<T, Distance>::infer(T* data, int nSamples, int nDim, int* labels, 
     }
   }
   tmp = 0;
+  int* bla = new int(3);
   return 3.0;
 }
 
