@@ -24,6 +24,9 @@ class L2Squared;
 template <typename T, typename Distance = L2Squared<T> >
 class KMeans;
 
+template <int N = 2>
+class Slic;
+
 
 template <typename T>
 bool isContained(T* begin, T* end, T value) {
@@ -44,6 +47,10 @@ void divideByScalar(T* start, T* end, T* dest, double scalar) {
 
 template <int N>
 class Slic {
+public:
+  struct DataPoint;
+  class SlicSquaredDistance;
+  
 private:
   // data
   BRGBImage img_;
@@ -62,12 +69,12 @@ public:
   // constructors, destructor
   Slic() : nSamples_(0) {}
   Slic(BRGBImage img, int kx, int ky, double maxDist, double weight) :
-    img_(img), nSamples_(img.width()*img.height()), kx_(kx), ky_(ky),
-    maxSpatialDistance_(maxDist), data_(0), weight_(weight)
+    img_(img), data_(0), nSamples_(img.width()*img.height()), kx_(kx),
+    ky_(ky), maxSpatialDistance_(maxDist), weight_(weight)
   {transformData();}
   Slic(BRGBImage img, int width, double maxDist, double weight) :
-      img_(img), nSamples_(img.width()*img.height()), width_(width),
-      maxSpatialDistance_(maxDist), data_(0), weight_(weight)
+    img_(img), data_(0), nSamples_(img.width()*img.height()),
+    width_(width), maxSpatialDistance_(maxDist), weight_(weight)
   {transformDataGivenWidth();}
   ~Slic();
 
@@ -195,15 +202,19 @@ Slic<N>::~Slic() {
 
 template<int N>
 void Slic<N>::deletePointers() {
-  delete[] data_, data_ = 0;
-  delete[] centers_, centers_ = 0;
-  delete[] labels_, labels_ = 0;
+  if(!data_)
+    delete[] data_, data_ = 0;
+  if(!centers_)
+    delete[] centers_, centers_ = 0;
+  if(!labels_)
+    delete[] labels_, labels_ = 0;
 }
 
 
 template<int N>
 void Slic<N>::initializeClusters() {
-  delete[] centers_;
+  if(!centers_)
+    delete[] centers_;
   centers_ = new typename Slic<N>::DataPoint[kx_*ky_];
   double width = 1.0*width_;
   double startWidth = 0.5*width;
@@ -230,10 +241,12 @@ void Slic<N>::transformData() {
   int sample = 0;
   BRGBImage::Iterator end = img_.lowerRight();
   BRGBImage::Iterator ity = img_.upperLeft();
-  for (; ity.y != end.y; ++ity.y) {
+  int x, y = 0;
+  for (; ity.y != end.y; ++ity.y, ++y) {
     BRGBImage::Iterator itx = ity;
-    for (; itx.x != end.x; ++itx.x, sample++) {
-      *(data_ + sample) = typename Slic<N>::DataPoint(TinyVector<double, N>(ity.y, itx.x), TinyVector<double, 3>(*itx));
+    x = 0;
+    for (; itx.x != end.x; ++itx.x, sample++, ++x) {
+      *(data_ + sample) = typename Slic<N>::DataPoint(TinyVector<double, N>(y, x), TinyVector<double, 3>(*itx));
     }
   }
   initializeClusters();
