@@ -27,6 +27,9 @@ class KMeans;
 template <int N = 2>
 class Slic;
 
+//template <int N>
+//typename Slic<N>::DataPoint operator+(typename Slic<N>::DataPoint const& p1, typename Slic<N>::DataPoint const& p2);
+
 
 template <typename T>
 bool isContained(T* begin, T* end, T value) {
@@ -55,8 +58,10 @@ private:
   // data
   BRGBImage img_;
   int* labels_;
-  DataPoint* centers_;
-  DataPoint* data_;
+  // DataPoint* centers_;
+  // DataPoint* data_;
+  double* centers_;
+  double* data_;
   int nSamples_;
   
   // parameters
@@ -64,16 +69,17 @@ private:
   int width_;
   double maxSpatialDistance_;
   double weight_;
+
    
 public:
   // constructors, destructor
   Slic() : nSamples_(0) {}
-  Slic(BRGBImage img, int kx, int ky, double maxDist, double weight) :
-    img_(img), data_(0), nSamples_(img.width()*img.height()), kx_(kx),
+  Slic(BRGBImage& img, int kx, int ky, double maxDist, double weight) :
+    img_(img), labels_(0), centers_(0), data_(0), nSamples_(img.width()*img.height()), kx_(kx),
     ky_(ky), maxSpatialDistance_(maxDist), weight_(weight)
   {transformData();}
-  Slic(BRGBImage img, int width, double maxDist, double weight) :
-    img_(img), data_(0), nSamples_(img.width()*img.height()),
+  Slic(BRGBImage& img, int width, double maxDist, double weight) :
+    img_(img), labels_(0), centers_(0), data_(0), nSamples_(img.width()*img.height()),
     width_(width), maxSpatialDistance_(maxDist), weight_(weight)
   {transformDataGivenWidth();}
   ~Slic();
@@ -92,29 +98,79 @@ public:
     DataPoint(TinyVector<double, N> coord, TinyVector<double, 3> RGB) :
       coord_(coord), RGB_(RGB) {}
 
-    template<int U>
-    friend DataPoint operator+(DataPoint const& p1, DataPoint const& p2);
-    template<int U>
-    friend DataPoint operator-(DataPoint const& p1, DataPoint const& p2);
-    template<int U>
-    friend DataPoint operator*(DataPoint const& p1, DataPoint const& p2);
-    template<int U>
-    friend DataPoint operator*(double const& scalar, DataPoint const& p);
-    template<int U>
-    friend DataPoint operator*(DataPoint const& p, double const& scalar);
-    template<int U>
-    friend DataPoint operator/(DataPoint const& p, double const& scalar);
+    DataPoint operator=(DataPoint const& rhs);
+    DataPoint operator=(int const& rhs);
+    
+    friend DataPoint operator+(DataPoint const& p1, DataPoint const& p2) {
+      DataPoint p;
+      p.coord_ = p1.coord_;
+      p.coord_ += p2.coord_;
+      p.RGB_ = p1.RGB_;
+      p.RGB_ += p2.RGB_;
+      return p;
+    }
+      
+    friend DataPoint operator-(DataPoint const& p1, DataPoint const& p2) {
+      DataPoint p;
+      p.coord_ = p1.coord_;
+      p.coord_ -= p2.coord_;
+      p.RGB_ = p1.RGB_;
+      p.RGB_ -= p2.RGB_;
+      return p;
+    }
+      
+    friend DataPoint operator*(DataPoint const& p1, DataPoint const& p2) {
+      DataPoint p;
+      p.coord_ = p1.coord_;
+      p.coord_ *= p2.coord_;
+      p.RGB_ = p1.RGB_;
+      p.RGB_ *= p2.RGB_;
+      return p;
+    }
+    
+    friend DataPoint operator*(double const& scalar, DataPoint const& p) {
+      DataPoint res;
+      res.coord_ = p.coord_;
+      res.coord_ *= scalar;
+      res.RGB_ = p.RGB_;
+      res.RGB_ *= scalar;
+      return res;
+    }
+    
+    friend DataPoint operator*(DataPoint const& p, double const& scalar) {
+      return operator*(scalar, p);
+    }
+    friend DataPoint operator/(DataPoint const& p, double const& scalar) {
+      DataPoint res;
+      res.coord_ = p.coord_;
+      res.coord_ /= scalar;
+      res.RGB_ = p.RGB_;
+      res.RGB_ /= scalar;
+      return res;
+    }
+      
   };
   
 
   // distance for Slic
+  // obsolete: own datapoint structure
+  /*
   class SlicSquaredDistance {
   private:
     double limit_;
     double weight_;
   public:
     SlicSquaredDistance(double limit, double weight) : limit_(limit), weight_(weight) {}
-    double operator()(DataPoint* p1, DataPoint* p2);
+    double operator()(DataPoint* p1, DataPoint* p2, int n);
+    }; */
+
+  class SlicSquaredDistance {
+  private:
+    double limit_;
+    double weight_;
+  public:
+    SlicSquaredDistance(double limit, double weight) : limit_(limit), weight_(weight) {}
+    double operator()(double* p1, double* p2, int n);
   };
 
 
@@ -141,12 +197,26 @@ public:
 
 
 
+template<int U>
+typename Slic<U>::DataPoint Slic<U>::DataPoint::operator=(typename Slic<U>::DataPoint const& rhs) {
+  coord_ = rhs.coord_;
+  RGB_ = rhs.RGB_;
+  return rhs;
+}
 
+template<int U>
+typename Slic<U>::DataPoint Slic<U>::DataPoint::operator=(int const& rhs) {
+  coord_.init(rhs);
+  RGB_.init(rhs);
+  return *this;
+}
+
+/* 
 // templated typenames only supported from gcc 4.7+
-template<int N>
-// typedef typename Slic<N>::DataPoint DataPoint
-typename Slic<N>::DataPoint operator+(typename Slic<N>::DataPoint const& p1, typename Slic<N>::DataPoint const& p2) {
-  typename Slic<N>::DataPoint p;
+template<int U>
+// typedef typename Slic<U>::DataPoint DataPoint
+typename Slic<U>::DataPoint operator+(typename Slic<U>::DataPoint const& p1, typename Slic<U>::DataPoint const& p2) {
+  typename Slic<U>::DataPoint p;
   p.coord_ = p1.coord_;
   p.coord_ += p2.coord_;
   p.RGB_ = p1.RGB_;
@@ -154,21 +224,21 @@ typename Slic<N>::DataPoint operator+(typename Slic<N>::DataPoint const& p1, typ
   return p;
 }
 
-template<int N>
-// typedef typename Slic<N>::DataPoint DataPoint
-typename Slic<N>::DataPoint operator-(typename Slic<N>::DataPoint const& p1, typename Slic<N>::DataPoint const& p2) {
-  typename Slic<N>::DataPoint p;
+template<int U>
+// typedef typename Slic<U>::DataPoint DataPoint
+typename Slic<U>::DataPoint operator-(typename Slic<U>::DataPoint const& p1, typename Slic<U>::DataPoint const& p2) {
+  typename Slic<U>::DataPoint p;
   p.coord_ = p1.coord_;
-  p.coord_ -= p2.coord_;
+  // p.coord_ -= p2.coord_;
   p.RGB_ = p1.RGB_;
-  p.RGB_ -= p2.RGB_;
+  // p.RGB_ -= p2.RGB_;
   return p;
 }
 
-template<int N>
-// typedef typename Slic<N>::DataPoint DataPoint
-typename Slic<N>::DataPoint operator*(typename Slic<N>::DataPoint const& p1, typename Slic<N>::DataPoint const& p2) {
-  typename Slic<N>::DataPoint p;
+template<int U>
+// typedef typename Slic<U>::DataPoint DataPoint
+typename Slic<U>::DataPoint operator*(typename Slic<U>::DataPoint const& p1, typename Slic<U>::DataPoint const& p2) {
+  typename Slic<U>::DataPoint p;
   p.coord_ = p1.coord_;
   p.coord_ *= p2.coord_;
   p.RGB_ = p1.RGB_;
@@ -176,24 +246,49 @@ typename Slic<N>::DataPoint operator*(typename Slic<N>::DataPoint const& p1, typ
   return p;
 }
 
-template<int N>
-double Slic<N>::SlicSquaredDistance::operator()(typename Slic<N>::DataPoint* p1, typename Slic<N>::DataPoint* p2) {
+template<int U>
+typename Slic<U>::DataPoint operator*(double const& scalar, typename Slic<U>::DataPoint const& p) {
+  typename Slic<U>::DataPoint res;
+  res.coord_ = p.coord_;
+  res.coord_ *= scalar;
+  res.RGB_ = p.RGB_;
+  res.RGB_ *= scalar;
+  return res;
+}
+
+template<int U>
+typename Slic<U>::DataPoint operator*(typename Slic<U>::DataPoint const& p, double const& scalar) {
+  return operator*(scalar, p);
+}
+
+template<int U>
+typename Slic<U>::DataPoint operator/(typename Slic<U>::DataPoint const& p, double const& scalar) {
+  typename Slic<U>::DataPoint res;
+  res.coord_ = p.coord_;
+  res.coord_ /= scalar;
+  res.RGB_ = p.RGB_;
+  res.RGB_ /= scalar;
+  return res;
+  }*/
+
+// obsolete: using datastructure DataPoint
+/* template<int N>
+double Slic<N>::SlicSquaredDistance::operator()(typename Slic<N>::DataPoint* p1, typename Slic<N>::DataPoint* p2, int n) {
   double sum = 0.0;
   double sumCoord = 0.0;
   double sumRGB = 0.0;
-  typename Slic<N>::DataPoint p = (*p1 - *p2)*(*p1 - *p2);
+  typename Slic<N>::DataPoint p = (operator-(*p1, *p2))*(operator-(*p1, *p2));
   for (typename TinyVector<double, N>::iterator it = p.coord_.begin(); it != p.coord_.end(); it++) {
     sumCoord += *it;
   }
   for (typename TinyVector<double, 3>::iterator it = p.RGB_.begin(); it != p.RGB_.end(); it++) {
     sumRGB += *it;
   }
-  if (sumRGB > maxSpatialDistance_)
-    return std::numeric_limits<double>::max;
+  if (sumCoord > limit_)
+    return std::numeric_limits<double>::max();
   sum = sumCoord + weight_*sumRGB;
   return sum;
-}
-
+  } */
 
 template<int N>
 Slic<N>::~Slic() {
@@ -201,30 +296,53 @@ Slic<N>::~Slic() {
 }
 
 template<int N>
+double Slic<N>::SlicSquaredDistance::operator()(double* p1, double* p2, int n) {
+  double sum = 0.0;
+  double sumCoord = 0.0;
+  double sumRGB = 0.0;
+  for (int i = 0; i < N; i++, p1++, p2++) {
+    sumCoord += (*p1-*p2)*(*p1-*p2);
+  }
+  for (int i = 0; i < 3; i++, p1++, p2++) {
+    sumRGB += (*p1-*p2)*(*p1-*p2);
+  }
+  if (sumCoord > limit_)
+    return std::numeric_limits<double>::max();
+  sum = sumCoord + weight_*sumRGB;
+  return sum;
+}
+
+
+template<int N>
 void Slic<N>::deletePointers() {
-  if(!data_)
+  if(data_)
     delete[] data_, data_ = 0;
-  if(!centers_)
+  if(centers_)
     delete[] centers_, centers_ = 0;
-  if(!labels_)
+  if(labels_)
     delete[] labels_, labels_ = 0;
 }
 
 
 template<int N>
 void Slic<N>::initializeClusters() {
-  if(!centers_)
-    delete[] centers_;
-  centers_ = new typename Slic<N>::DataPoint[kx_*ky_];
+  if(centers_)
+    delete[] centers_, centers_ = 0;
+  int sampleDim = N+3;
+  centers_ = new double[kx_*ky_*sampleDim];
   double width = 1.0*width_;
   double startWidth = 0.5*width;
   double startWidthY = startWidth;
   double startWidthX;
-  typename Slic<N>::DataPoint* data = data_;
+  double* centers = centers_;
   for (int y = 0; y < ky_; y++, startWidthY += width) {
     startWidthX = startWidth;
-    for (int x = 0; x < kx_; x++, startWidthX += width, data++) {
-      *data = typename Slic<N>::DataPoint(TinyVector<double, N>(y, x), TinyVector<double, 3>(128, 128, 128));
+    for (int x = 0; x < kx_; x++, startWidthX += width, centers+=N) {
+      *centers     = x;
+      *(centers+1) = y;
+      *(centers+2) = 128.0;
+      *(centers+3) = 128.0;
+      *(centers+4) = 128.0;
     }
   }
 }
@@ -234,20 +352,30 @@ void Slic<N>::initializeClusters() {
 template<int N>
 void Slic<N>::transformData() {
   deletePointers();
-  data_ = new typename Slic<N>::DataPoint[nSamples_];
+  int sampleDim = N+3;
+  data_ = new double[nSamples_*sampleDim];
+  std::fill_n(data_, nSamples_*sampleDim, 0);
   labels_ = new int[nSamples_];
   width_ = img_.width()/kx_;
   std::fill_n(labels_, nSamples_, -1);
   int sample = 0;
   BRGBImage::Iterator end = img_.lowerRight();
   BRGBImage::Iterator ity = img_.upperLeft();
-  int x, y = 0;
-  for (; ity.y != end.y; ++ity.y, ++y) {
+  int coordX, coordY = 0;
+  for (; ity.y != end.y; ++ity.y) {
     BRGBImage::Iterator itx = ity;
-    x = 0;
-    for (; itx.x != end.x; ++itx.x, sample++, ++x) {
-      *(data_ + sample) = typename Slic<N>::DataPoint(TinyVector<double, N>(y, x), TinyVector<double, 3>(*itx));
+    coordX = 0;
+    for (; itx.x != end.x; ++itx.x) {
+      //std::cout << sample << "  " << nSamples_*sampleDim << "\n";
+      *(data_ + sample)   = (double) coordX;
+      *(data_ + sample+1) = (double) coordY;
+      *(data_ + sample+2) = (double) itx->red();
+      *(data_ + sample+3) = (double) itx->blue();
+      *(data_ + sample+4) = (double) itx->green();
+      sample+=sampleDim;
+      coordX++;
     }
+    coordY++;
   }
   initializeClusters();
 }
@@ -263,8 +391,8 @@ void Slic<N>::transformDataGivenWidth() {
 
 template<int N>
 double Slic<N>::infer() {
-  KMeans<typename Slic<N>::DataPoint, Slic<N>::SlicSquaredDistance> kMeans(Slic<N>::SlicSquaredDistance(maxSpatialDistance_, weight_), kx_*ky_);
-  return kMeans.infer(data_, nSamples_, 1, labels_, centers_, 1);
+  KMeans<double, Slic<N>::SlicSquaredDistance> kMeans(Slic<N>::SlicSquaredDistance(maxSpatialDistance_, weight_), kx_*ky_, 2, 10000);
+  return kMeans.infer(data_, nSamples_, N+3, labels_, centers_, 1);
 }
 
 
@@ -285,11 +413,16 @@ public:
   KMeans(Distance metric, int k = 2, int maxIter = 1000, double threshold = 0) :
     metric_(metric), k_(k), maxIter_(maxIter), threshold_(threshold), clusterSize_(0)
   {clusterSize_ = new int[k_];}
-  ~KMeans() {delete[] clusterSize_;}
+  ~KMeans();
 
   double infer(T* data, int nSamples, int nDim, int* labels, T* centers, int initialize = 0);
 };
 
+template <typename T, typename Distance>
+KMeans<T, Distance>::~KMeans() {
+  //  if(clusterSize_)
+    //    delete[] clusterSize_, clusterSize_ = 0;
+}
 
 template <typename T, typename Distance>
 void KMeans<T, Distance>::initializeRandom(int* randNumbers, int max) {
@@ -372,6 +505,7 @@ double KMeans<T, Distance>::infer(T* data, int nSamples, int nDim, int* labels, 
     sumDistances = assignLabels(data, nSamples, nDim, labels, centers);
     updateCenters(data, nSamples, nDim, labels, centers);
     nIter++;
+    
   }
   return sumDistances;
 }

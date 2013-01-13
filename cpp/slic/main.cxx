@@ -1,8 +1,9 @@
-o#include "slic.hxx"
+#include "slic.hxx"
 #include <iostream>
 #include <algorithm>
 
 // #include <vigra/stdimage.hxx>
+#include <vigra/basicimage.hxx>
 #include <vigra/impex.hxx>
 
 using namespace std;
@@ -34,6 +35,6 @@ int main() {
   BRGBImage img(info.width(), info.height());
   vigra::importImage(info, destImage(img));
   Slic<2> slic(img, 16, 16, 20.0, 0.5);
-  // slic.infer();
+  slic.infer();
   return 0;
 }
