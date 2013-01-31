@@ -337,14 +337,16 @@ void Slic<N>::initializeClusters() {
   double* centers = centers_;
   for (int y = 0; y < ky_; y++, startWidthY += width) {
     startWidthX = startWidth;
-    for (int x = 0; x < kx_; x++, startWidthX += width, centers+=N) {
-      *centers     = x;
-      *(centers+1) = y;
-      *(centers+2) = 128.0;
-      *(centers+3) = 128.0;
-      *(centers+4) = 128.0;
+    for (int x = 0; x < kx_; x++, startWidthX += width, centers_+=N) {
+      *centers_     = static_cast<double>(x);
+      *(centers_+1) = static_cast<double>(y);
+      *(centers_+2) = 128.0;
+      *(centers_+3) = 128.0;
+      *(centers_+4) = 128.0;
     }
   }
+  centers_ = centers;
+  centers = 0;
 }
   
   
