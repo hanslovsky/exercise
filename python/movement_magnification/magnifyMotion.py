@@ -50,13 +50,15 @@ def filterTimeSeries(pyramidSequence, kernel, weights):
     sumPyrSequence = []
     for scale in pyramidSequence:
         sumPyrSequence.append((1.0-weights[lvl])*scale)
-        sumPyrSequence[lvl] += weights[lvl]*vigra.filters.convolve(scale, (kernel, zeroKernel, zeroKernel))
+        # sumPyrSequence[lvl] += weights[lvl]*vigra.filters.convolve(scale, (kernel, zeroKernel, zeroKernel))
+        sumPyrSequence[lvl] += weights[lvl]*vigra.filters.convolveOneDimension(scale, 0, kernel)
         lvl += 1
-    lvl -= 1
-    while lvl > 0:
+    for t in range(sumPyrSequence[0].shape[0]):
+        lvl = len(sumPyrSequence)-1
+        while lvl > 0:
         # loop could be avoided if vigra would allow for resize in arbitrary dimensions
-        sumPyrSequence[lvl-1] += vigra.sampling.resize(sumPyrSequence[lvl], shape = sumPyrSequence[lvl-1].shape[:3])
-        lvl -= 1
+            sumPyrSequence[lvl-1][t,...] += vigra.sampling.resize(sumPyrSequence[lvl][t,...], shape = sumPyrSequence[lvl-1][t,...].shape[:2])
+            lvl -= 1
     return sumPyrSequence[0]
     
 def writeSequence(sequence, fn_base, ext = '.png'):
@@ -73,6 +75,7 @@ def writeSequence(sequence, fn_base, ext = '.png'):
 
 if __name__ == '__main__':
     import argparse
+    from time import clock, time
     parser = argparse.ArgumentParser(description='Movement Magnficiation')
     parser.add_argument('-f', '--filename_base', dest = 'fn', required=True)
     parser.add_argument('-o', '--out_base', dest = 'out', required=True)
@@ -82,23 +85,34 @@ if __name__ == '__main__':
     nLevels = args['nLevels']
     out = args['out']
 
+    t0 = clock()
     print "loading sequence from " + fn, '...'
     sequence = readVideoImageStack(fn)
+    t1 = clock()
+    print "[%s]: %s  -  done" % (t1-t0, t1-t0)
     print "building pyramid with %d levels ..." % nLevels
     pyramidSequence = buildPyramid(sequence, nLevels)
+    t2 = clock()
+    print "[%s]: %s  -  done" % (t2-t0, t2-t1)
     print "applying kernels in temporal domain ..."
     kernel = vigra.filters.Kernel1D()
     # kernel.initBinomial(radius=1)
     kernel.initExplicitly(left=-2, right=2, contents=np.array([0.25, 0.5, 0, -0.5, -0.25]))
-    weights = [0.1]*nLevels
+    weights = np.zeros(nLevels) + 0.1
     # for i in range(nLevels):
     #     weights[i] = 1.0 - 1.0/(i+2)**2
-    weights[nLevels-4] = 0.9
+    '''weights[nLevels-6] = 0.3
+    weights[nLevels-5] = 0.2
+    weights[nLevels-4] = 0.1
     weights[nLevels-3] = 0.5
     weights[nLevels-2] = 0.5
-    weights[nLevels-1] = 0.9
+    weights[nLevels-1] = 0.7'''
+    weights[...] = 0.3
+    weights[nLevels-1] = 0.01
     
     reconstructedSequence = filterTimeSeries(pyramidSequence, kernel, weights)
+    t3 = clock()
+    print "[%s]: %s  -  done" % (t3-t0, t3-t2)
 
     '''scale = 0
     for el in pyramidSequence:
