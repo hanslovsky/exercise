@@ -6,6 +6,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+  if (argc) cout << argv[0] << endl;
   Complex a(3, 4);
   Complex b(1, 1);
   Complex c(1, -1);

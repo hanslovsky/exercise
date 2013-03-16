@@ -5,20 +5,28 @@
 
 using namespace boost::python;
 
-class Compl {
-private:
-  double re_;
-  double im_;
-public:
-  Compl() : re_(0), im_(0) {}
-  Compl(double re, double im) : re_(re), im_(im) {}
+Complex (Complex::*a)(const Complex&) const = &Complex::add;
+Complex (Complex::*s)(const Complex&) const = &Complex::sub;
+Complex (Complex::*m)(const Complex&) const = &Complex::mult;
+Complex (Complex::*d)(const Complex&) const = &Complex::div;
 
-  double abs() {return re_*re_ + im_*im_;}
-};
 
 void export_complex() {
-  class_<Complex>("Complex", init<>())
+  class_<Complex>("Complex")
     .def(init<double, double>(args("re", "im")))
+    .def(init<Complex>(args("c")))
+    .def("add", a)
+    .def("sub", s)
+    .def("mult", m)
+    .def("div", d)
+    .def("setR", &Complex::setR)
+    .def("setI", &Complex::setI)
+    .def("set", &Complex::set)
+    .def("conj", &Complex::conj)
+    .def("re", &Complex::getR)
+    .def("im", &Complex::getI)
+    .def("sqAbs", &Complex::sqAbs)
     .def("abs", &Complex::abs)
     ;
 }
+

@@ -7,7 +7,7 @@ class Complex {
 private:
   double x_, y_;
 public:
-  Complex();
+  Complex() : x_(0), y_(0) {}
   Complex(double x, double y) :
     x_(x), y_(y)
   {};
@@ -58,4 +58,5 @@ public:
   friend Complex operator/(const double &scalar, const Complex &c);
 };
 
-#endif
+#endif /*COMPLEX_HXX*/
+
