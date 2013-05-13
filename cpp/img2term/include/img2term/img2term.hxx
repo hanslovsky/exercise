@@ -227,25 +227,29 @@ namespace img2term {
     CharVec char_list_;
     CharDrawerStrategyPtr char_drawer_strategy_;
     AveragingStrategyPtr averaging_strategy_;
+    double aspect_ratio_;
   public:
     OptionClass() :
       n_chars_per_column_(80),
       color_match_strategy_(ColorMatchStrategyPtr(new ColorMatchStrategyRGB)),
       char_list_(CharVec(1, '#')),
       char_drawer_strategy_(CharDrawerStrategyPtr(new CharDrawerStrategySingleChar)),
-      averaging_strategy_(AveragingStrategyPtr(new AveragingStrategyMean))
+      averaging_strategy_(AveragingStrategyPtr(new AveragingStrategyMean)),
+      aspect_ratio_(2.0)
     {}
     
     OptionClass(uint n_chars_per_column,
                 ColorMatchStrategyPtr color_match_strategy,
                 CharVec char_list,
                 CharDrawerStrategyPtr char_drawer_strategy,
-                AveragingStrategyPtr averaging_strategy) :
+                AveragingStrategyPtr averaging_strategy,
+                double aspect_ratio) :
       n_chars_per_column_(n_chars_per_column),
       color_match_strategy_(color_match_strategy),
       char_list_(char_list),
       char_drawer_strategy_(char_drawer_strategy),
-      averaging_strategy_(averaging_strategy)
+      averaging_strategy_(averaging_strategy),
+      aspect_ratio_(aspect_ratio)
     {}
 
     friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, const OptionClass& options);
@@ -263,13 +267,13 @@ namespace img2term {
     ImagePatch();
   public:
     ImagePatch(vigra::MultiArrayView<3, uint> patch,
-               ImgColorType previous_color,
-               bool color_changed) :
+               ImgColorType previous_color) :
       patch_(patch),
       previous_color_(previous_color),
       color_changed_(0)
     {}
-    void calculate_current_color_(const AveragingStrategyBase& strategy);
+    void calculate_current_color(const AveragingStrategyBase& strategy);
+    void calculate_term_color(const ColorMatchStrategyBase& strategy);
 
     bool get_color_changed_();
     ImgColorType get_previous_color();

@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <numeric>
+#include <algorithm>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -45,7 +46,8 @@ namespace img2term {
   }
 
   std::ostream& operator<<(std::ostream& os, const TermColorType& color) {
-    return os << color.term_color_;
+    os << color.term_color_;
+    return os;
   }
 
 
@@ -115,6 +117,89 @@ namespace img2term {
     }
     return squared_sum;
   }
+
+
+  ////
+  //// OptionClass
+  ////
+  PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, const OptionClass& options) {
+    uint Y = image.shape()[0];
+    uint X = image.shape()[1];
+    uint patch_width = std::min(X/options.n_chars_per_column_, X);
+    uint patch_height = std::min(static_cast<uint>(options.aspect_ratio_*X), Y);
+    PatchArray2DPtr res(new PatchArray2D);
+    for (int x = 0; x < X; x += patch_width) {
+      res->patches_.push_back(std::vector<ImagePatch>());
+      uint delta_x = std::min(patch_width, X - x);
+      ImgColorType previous_color(vigra::TinyVector<uint, 3>(257, 257, 257));
+      for (int y = 0; y < Y; y += patch_height) {
+        uint delta_y = std::min(patch_height, Y - y);
+        ImagePatch patch(image.subarray(vigra::TinyVector<uint, 3>(y,x,0),
+                                        vigra::TinyVector<uint,3>(y+delta_y, x+delta_x, 3)),
+                         previous_color);
+        patch.calculate_current_color(*options.averaging_strategy_);
+        previous_color = patch.get_current_color();
+      }
+    }
+    return res;
+  }
+
+
+  ////
+  //// ImagePatch
+  ////
+  void ImagePatch::calculate_current_color(const AveragingStrategyBase& strategy) {
+    current_color_ = strategy(patch_);
+    color_changed_ = !(previous_color == current_color_);
+  }
+
+  void ImagePatch::calculate_term_color(const ColorMatchStrategyBase& strategy) {
+    term_color_ = strategy(current_color_);
+  }
+
+  bool ImagePatch::get_color_changed() {
+    return color_changed_;
+  }
+
+  ImgColorType ImagePatch::get_previous_color() {
+    return previous_color_;
+  }
+
+  ImgColorType ImagePatch::get_current_color() {
+    return current_color_;
+  }
+
+  TermColorType get_term_color() {
+    return term_color_;
+  }
+
+  std::ostream& operator<<(std::ostream os, const ImagePatch& patch) {
+    os << patch.term_color_;
+    return os;
+  }
+
+
+  ////
+  //// PatchArray2D
+  ////
+  std::ostream& operator<<(std::ostream& os, const PatchArray2D& patch_array) {
+    std::vector<std::vector<ImagePatch> >::iterator it_2d;
+    std::vector<ImagePatch>::iterator it_1d;
+    for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
+      for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
+        os << *it_1d;
+      }
+      os << '\n';
+    }
+    os << '\b';
+    return os;
+  }
+  
+
+
 }
+
+
+
 
 
