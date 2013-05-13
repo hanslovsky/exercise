@@ -90,90 +90,13 @@ namespace img2term {
   PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
 
 
-  class OptionClass {
-  private:
-    uint n_chars_per_column_;
-    ColorMatchStrategyBase& color_match_strategy_;
-    CharVec char_list_;
-    CharDrawerStrategyBase char_drawer_strategy_;
-    AveragingStrategyBase averaging_strategy_;
-  public:
-    OptionClass() :
-      n_chars_per_columns_(80),
-      color_match_strategy_(ColorMatchStrategyRGB()),
-      char_list_(CharVec(1, '#')),
-      char_drawer_strategy_(CharDrawerStrategySingleChar()),
-      averaging_strategy_(AveragingStrategyMean());
-    {}
-    
-    OptionClass(uint n_chars_per_column,
-                const ColorMatchStrategyBase& color_match_strategy,
-                CharVec char_list,
-                const CharDrawerStrategyBase& char_drawer_strategy) :
-      n_chars_per_column(n_chars_per_column),
-      color_match_strategy_(color_match_strategy),
-      char_list_(char_list),
-      char_drawer_strategy_(char_drawer_strategy),
-      averaging_strategy_(averaging_strategy)
-    {}
 
-    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
-  };
-
-
-  class ImagePatch {
-  private:
-    vigra::MultiArrayView<3, uint> patch_;
-    ImgColorType previous_color_;
-    bool color_changed_;
-    
-    ImgColorType current_color_;
-    TermColorType term_color_;
-    ImagePatch()
-  public:
-    ImagePatch(vigra::MultiArrayView<3, uint> patch,
-               ImgColorType previous_color,
-               bool color_changed) :
-      patch_(patch),
-      previous_color_(previous_color),
-      color_changed_(0)
-    {}
-    void calculate_current_color_(const AveragingStrategyBase& strategy);
-
-    bool get_color_changed_();
-    ImgColorType get_previous_color();
-    ImgColorType get_current_color();
-    TermColorType get_term_color();
-
-    friend std::ostream& operator<<(std::ostream os, const ImagePatch& patch);
-  };
-
-
-  class PatchArray2D {
-  private:
-    OptionClass options_;
-  public:
-    typedef std::vector<std::vector<ImagePatch> > Patches;
-    Patches patches_;
-    PatchArray2D() :
-      options_(OptionClass()),
-      patches_(0)
-    {}
-    PatchArray2D(const OptionClass& options) :
-      options_(options),
-      patches_(0)
-    {}
-
-    friend std::ostream& operator<<(std::ostream os, const PatchArray2D& patch_array);
-  };
-
-
-  class ImgColorType {
+    class ImgColorType {
   private:
     vigra::TinyVector<uint, 3> RGB_;
   public:
     ImgColorType() :
-      RGB_(vigra::TinyVector<uint, 3>(0))
+      RGB_(vigra::TinyVector<uint, 3>(0, 0, 0))
     {}
     ImgColorType(vigra::TinyVector<uint, 3> RGB) :
       RGB_(RGB)
@@ -193,7 +116,7 @@ namespace img2term {
     TermColorType(std::string term_color) :
       term_color_(term_color)
     {}
-    std::string get_term_color() {return term_color_};
+    std::string get_term_color() {return term_color_;};
     friend bool operator==(const TermColorType& c1, const TermColorType& c2);
     friend std::ostream& operator<<(std::ostream&, const TermColorType& color);
   };
@@ -240,11 +163,11 @@ namespace img2term {
 
   class ColorMatchStrategyHSV : public ColorMatchStrategyBase {
   private:
-    ColorMatchStrategyHSV();
+    // ColorMatchStrategyHSV();
   public:
-    ColorMatchStrategyHSV(ColorDict dictionary) :
-      dictionary_(dictionary)
-    {}
+    //ColorMatchStrategyHSV(ColorDict dictionary) :
+    // dictionary_(dictionary)
+    // {}
     virtual TermColorType operator()(ImgColorType color);
   };
 
@@ -282,6 +205,88 @@ namespace img2term {
   public:
     virtual double operator()(ImgColorType c1, ImgColorType c2);
   };
+
+
+  class OptionClass {
+  private:
+    uint n_chars_per_column_;
+    ColorMatchStrategyBase* color_match_strategy_;
+    CharVec char_list_;
+    CharDrawerStrategyBase* char_drawer_strategy_;
+    AveragingStrategyBase* averaging_strategy_;
+  public:
+    /*OptionClass() :
+      n_chars_per_columns_(80),
+      color_match_strategy_(ColorMatchStrategyRGB()),
+      char_list_(CharVec(1, '#')),
+      char_drawer_strategy_(CharDrawerStrategySingleChar()),
+      averaging_strategy_(AveragingStrategyMean())
+    {} */
+    
+    OptionClass(uint n_chars_per_column,
+                ColorMatchStrategyBase* color_match_strategy,
+                CharVec char_list,
+                CharDrawerStrategyBase* char_drawer_strategy,
+                AveragingStrategyBase* averaging_strategy) :
+      n_chars_per_column_(n_chars_per_column),
+      color_match_strategy_(color_match_strategy),
+      char_list_(char_list),
+      char_drawer_strategy_(char_drawer_strategy),
+      averaging_strategy_(averaging_strategy)
+    {}
+
+    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
+  };
+
+
+  class ImagePatch {
+  private:
+    vigra::MultiArrayView<3, uint> patch_;
+    ImgColorType previous_color_;
+    bool color_changed_;
+    
+    ImgColorType current_color_;
+    TermColorType term_color_;
+    ImagePatch();
+  public:
+    ImagePatch(vigra::MultiArrayView<3, uint> patch,
+               ImgColorType previous_color,
+               bool color_changed) :
+      patch_(patch),
+      previous_color_(previous_color),
+      color_changed_(0)
+    {}
+    void calculate_current_color_(const AveragingStrategyBase& strategy);
+
+    bool get_color_changed_();
+    ImgColorType get_previous_color();
+    ImgColorType get_current_color();
+    TermColorType get_term_color();
+
+    friend std::ostream& operator<<(std::ostream os, const ImagePatch& patch);
+  };
+
+
+  class PatchArray2D {
+  private:
+    OptionClass options_;
+  public:
+    typedef std::vector<std::vector<ImagePatch> > Patches;
+    Patches patches_;
+    /*PatchArray2D() :
+      options_(OptionClass()),
+      patches_(0)
+      {}*/
+    PatchArray2D(const OptionClass& options) :
+      options_(options),
+      patches_(0)
+    {}
+
+    friend std::ostream& operator<<(std::ostream os, const PatchArray2D& patch_array);
+  };
+
+
+
 
 
 }
