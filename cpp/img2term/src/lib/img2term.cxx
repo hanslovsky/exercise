@@ -47,7 +47,7 @@ namespace img2term {
   }
 
   std::ostream& operator<<(std::ostream& os, const TermColorType& color) {
-    os << color.term_color_;
+    os << color.term_color_.c_str();
     return os;
   }
 
@@ -175,8 +175,8 @@ namespace img2term {
   }
 
   std::ostream& operator<<(std::ostream& os, const ImagePatch& patch) {
-    os << patch.term_color_;
-    // os << patch.get_term_color();
+    // os << patch.term_color_;
+    os << patch.get_term_color();
     return os;
   }
 
@@ -190,7 +190,8 @@ namespace img2term {
     for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
       for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
         // os << (*it_1d).get_term_color();
-        os << *it_1d;
+        ImagePatch p = *it_1d;
+        os << p;
       }
       os << "\n";
     }

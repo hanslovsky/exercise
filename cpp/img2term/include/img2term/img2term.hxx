@@ -277,8 +277,12 @@ namespace img2term {
     
     ImgColorType current_color_;
     TermColorType term_color_;
-    ImagePatch();
   public:
+    ImagePatch() :
+      patch_(vigra::MultiArrayView<3, uint>()),
+      previous_color_(ImgColorType()),
+      color_changed_(0)
+    {}
     ImagePatch(vigra::MultiArrayView<3, uint> patch,
                ImgColorType previous_color) :
       patch_(patch),
