@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <ostream>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -98,9 +99,21 @@ namespace img2term {
   typedef boost::shared_ptr<DistanceStrategyBase> DistanceStrategyPtr;
 
 
+
+  
+  
   // functions
   
   PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
+
+
+  /*std::ostream& operator<<(std::ostream& os, TermColorType& color);
+
+  
+  std::ostream& operator<<(std::ostream& os, ImagePatch& patch);
+
+  
+  std::ostream& operator<<(std::ostream& os, PatchArray2D& patch_array);*/
 
 
 
@@ -138,28 +151,28 @@ namespace img2term {
   class AveragingStrategyBase {
   private:
   public:
-    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch) = 0;
+    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch) const = 0;
   };
 
 
   class AveragingStrategyMean : public AveragingStrategyBase {
   private:
   public:
-    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch);
+    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch) const;
   };
 
 
   class AveragingStrategyMedian : public AveragingStrategyBase {
   private:
   public:
-    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch);
+    virtual ImgColorType operator()(vigra::MultiArrayView<3, uint> patch) const;
   };
 
 
   class ColorMatchStrategyBase {
     // ColorDict dictionary_;
   public:
-    virtual TermColorType operator()(ImgColorType color) = 0;
+    virtual TermColorType operator()(ImgColorType color) const = 0;
   };
 
 
@@ -170,7 +183,7 @@ namespace img2term {
     // ColorMatchStrategyRGB(ColorDict dictionary) :
     // dictionary_(dictionary)
     // {}
-    virtual TermColorType operator()(ImgColorType color);
+    virtual TermColorType operator()(ImgColorType color) const;
   };
 
 
@@ -181,7 +194,7 @@ namespace img2term {
     //ColorMatchStrategyHSV(ColorDict dictionary) :
     // dictionary_(dictionary)
     // {}
-    virtual TermColorType operator()(ImgColorType color);
+    virtual TermColorType operator()(ImgColorType color) const;
   };
 
 
@@ -252,7 +265,7 @@ namespace img2term {
       aspect_ratio_(aspect_ratio)
     {}
 
-    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, const OptionClass& options);
+    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
   };
 
 
@@ -275,10 +288,10 @@ namespace img2term {
     void calculate_current_color(const AveragingStrategyBase& strategy);
     void calculate_term_color(const ColorMatchStrategyBase& strategy);
 
-    bool get_color_changed_();
-    ImgColorType get_previous_color();
-    ImgColorType get_current_color();
-    TermColorType get_term_color();
+    bool get_color_changed() const;
+    ImgColorType get_previous_color() const;
+    ImgColorType get_current_color() const;
+    TermColorType get_term_color() const;
 
     friend std::ostream& operator<<(std::ostream os, const ImagePatch& patch);
   };
@@ -302,6 +315,8 @@ namespace img2term {
     friend std::ostream& operator<<(std::ostream os, const PatchArray2D& patch_array);
   };
 
+
+  
 
 }
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <numeric>
 #include <algorithm>
+#include <ostream>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -54,7 +55,7 @@ namespace img2term {
   ////
   //// AveragingStrategyMean
   ////
-  ImgColorType AveragingStrategyMean::operator()(vigra::MultiArrayView<3, uint> patch) {
+  ImgColorType AveragingStrategyMean::operator()(vigra::MultiArrayView<3, uint> patch) const {
     uint patch_size = patch.shape()[0]*patch.shape()[1];
     vigra::TinyVector<uint, 3> res;
     for(uint channel = 0; channel < 3; ++channel) {
@@ -68,7 +69,7 @@ namespace img2term {
   ////
   //// AveragingStrategyMedian
   ////
-  ImgColorType AveragingStrategyMedian::operator()(vigra::MultiArrayView<3, uint> patch) {
+  ImgColorType AveragingStrategyMedian::operator()(vigra::MultiArrayView<3, uint> patch) const {
     uint patch_size = patch.shape()[0]*patch.shape()[1];
     vigra::TinyVector<uint, 3> res;
     for(uint channel = 0; channel < 3; ++channel) {
@@ -84,7 +85,7 @@ namespace img2term {
   ////
   //// ColorMatchStrategyRGB
   ////
-  TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color) {
+  TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color) const {
     return TermColorType();
   }
 
@@ -92,7 +93,7 @@ namespace img2term {
   ////
   //// ColorMatchStrategyHSV
   ////
-  TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color) {
+  TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color) const {
     return TermColorType();
   }
 
@@ -150,31 +151,31 @@ namespace img2term {
   ////
   void ImagePatch::calculate_current_color(const AveragingStrategyBase& strategy) {
     current_color_ = strategy(patch_);
-    color_changed_ = !(previous_color == current_color_);
+    color_changed_ = !(previous_color_ == current_color_);
   }
 
   void ImagePatch::calculate_term_color(const ColorMatchStrategyBase& strategy) {
     term_color_ = strategy(current_color_);
   }
 
-  bool ImagePatch::get_color_changed() {
+  bool ImagePatch::get_color_changed() const {
     return color_changed_;
   }
 
-  ImgColorType ImagePatch::get_previous_color() {
+  ImgColorType ImagePatch::get_previous_color() const {
     return previous_color_;
   }
 
-  ImgColorType ImagePatch::get_current_color() {
+  ImgColorType ImagePatch::get_current_color() const {
     return current_color_;
   }
 
-  TermColorType get_term_color() {
+  TermColorType ImagePatch::get_term_color() const {
     return term_color_;
   }
 
-  std::ostream& operator<<(std::ostream os, const ImagePatch& patch) {
-    os << patch.term_color_;
+  std::ostream& operator<<(std::ostream& os, const ImagePatch& patch) {
+    os << patch.get_term_color();
     return os;
   }
 
@@ -183,15 +184,15 @@ namespace img2term {
   //// PatchArray2D
   ////
   std::ostream& operator<<(std::ostream& os, const PatchArray2D& patch_array) {
-    std::vector<std::vector<ImagePatch> >::iterator it_2d;
-    std::vector<ImagePatch>::iterator it_1d;
+    std::vector<std::vector<ImagePatch> >::const_iterator it_2d;
+    std::vector<ImagePatch>::const_iterator it_1d;
     for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
       for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
         os << *it_1d;
       }
-      os << '\n';
+      os << "\n";
     }
-    os << '\b';
+    os << "\b";
     return os;
   }
   
