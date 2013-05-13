@@ -20,14 +20,6 @@ namespace img2term {
 
   // classes
 
-  class OptionClass;
-
-
-  class ImagePatch;
-
-
-  class PatchArray2D;
-
 
   class ImgColorType;
 
@@ -67,6 +59,15 @@ namespace img2term {
 
   class DistanceStrategyHSV;
 
+  
+  class OptionClass;
+
+
+  class ImagePatch;
+
+
+  class PatchArray2D;
+
 
   // typedefs
   
@@ -85,13 +86,25 @@ namespace img2term {
   typedef std::map<ImgColorType, TermColorType> ColorDict;
 
 
+  typedef boost::shared_ptr<AveragingStrategyBase> AveragingStrategyPtr;
+
+  
+  typedef boost::shared_ptr<ColorMatchStrategyBase> ColorMatchStrategyPtr;
+
+
+  typedef boost::shared_ptr<CharDrawerStrategyBase> CharDrawerStrategyPtr;
+
+
+  typedef boost::shared_ptr<DistanceStrategyBase> DistanceStrategyPtr;
+
+
   // functions
   
   PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
 
 
 
-    class ImgColorType {
+  class ImgColorType {
   private:
     vigra::TinyVector<uint, 3> RGB_;
   public:
@@ -101,7 +114,7 @@ namespace img2term {
     ImgColorType(vigra::TinyVector<uint, 3> RGB) :
       RGB_(RGB)
     {}
-    vigra::TinyVector<uint, 3> get_RGB();
+    const vigra::TinyVector<uint, 3>& get_RGB();
     friend bool operator==(const ImgColorType& c1, const ImgColorType& c2);
   };
 
@@ -116,9 +129,9 @@ namespace img2term {
     TermColorType(std::string term_color) :
       term_color_(term_color)
     {}
-    std::string get_term_color() {return term_color_;};
+    std::string get_term_color();
     friend bool operator==(const TermColorType& c1, const TermColorType& c2);
-    friend std::ostream& operator<<(std::ostream&, const TermColorType& color);
+    friend std::ostream& operator<<(std::ostream& os, const TermColorType& color);
   };
 
 
@@ -179,7 +192,7 @@ namespace img2term {
   };
 
 
-  class CharDrawerStrategySingleChar {
+  class CharDrawerStrategySingleChar : public CharDrawerStrategyBase {
   private:
   public:
     virtual char operator()(const CharVec& char_list);
@@ -210,24 +223,24 @@ namespace img2term {
   class OptionClass {
   private:
     uint n_chars_per_column_;
-    ColorMatchStrategyBase* color_match_strategy_;
+    ColorMatchStrategyPtr color_match_strategy_;
     CharVec char_list_;
-    CharDrawerStrategyBase* char_drawer_strategy_;
-    AveragingStrategyBase* averaging_strategy_;
+    CharDrawerStrategyPtr char_drawer_strategy_;
+    AveragingStrategyPtr averaging_strategy_;
   public:
-    /*OptionClass() :
-      n_chars_per_columns_(80),
-      color_match_strategy_(ColorMatchStrategyRGB()),
+    OptionClass() :
+      n_chars_per_column_(80),
+      color_match_strategy_(ColorMatchStrategyPtr(new ColorMatchStrategyRGB)),
       char_list_(CharVec(1, '#')),
-      char_drawer_strategy_(CharDrawerStrategySingleChar()),
-      averaging_strategy_(AveragingStrategyMean())
-    {} */
+      char_drawer_strategy_(CharDrawerStrategyPtr(new CharDrawerStrategySingleChar)),
+      averaging_strategy_(AveragingStrategyPtr(new AveragingStrategyMean))
+    {}
     
     OptionClass(uint n_chars_per_column,
-                ColorMatchStrategyBase* color_match_strategy,
+                ColorMatchStrategyPtr color_match_strategy,
                 CharVec char_list,
-                CharDrawerStrategyBase* char_drawer_strategy,
-                AveragingStrategyBase* averaging_strategy) :
+                CharDrawerStrategyPtr char_drawer_strategy,
+                AveragingStrategyPtr averaging_strategy) :
       n_chars_per_column_(n_chars_per_column),
       color_match_strategy_(color_match_strategy),
       char_list_(char_list),
@@ -235,7 +248,7 @@ namespace img2term {
       averaging_strategy_(averaging_strategy)
     {}
 
-    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
+    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, const OptionClass& options);
   };
 
 
@@ -273,10 +286,10 @@ namespace img2term {
   public:
     typedef std::vector<std::vector<ImagePatch> > Patches;
     Patches patches_;
-    /*PatchArray2D() :
+    PatchArray2D() :
       options_(OptionClass()),
       patches_(0)
-      {}*/
+    {}
     PatchArray2D(const OptionClass& options) :
       options_(options),
       patches_(0)
@@ -284,9 +297,6 @@ namespace img2term {
 
     friend std::ostream& operator<<(std::ostream os, const PatchArray2D& patch_array);
   };
-
-
-
 
 
 }
