@@ -1,0 +1,23 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(img2term)
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_extensions/)
+FIND_PACKAGE(VIGRA REQUIRED)
+if (VIGRA_FOUND)
+    MESSAGE("--   > vigra found!")
+    INCLUDE_DIRECTORIES(${VIGRA_INCLUDE_DIR})
+    LINK_DIRECTORIES( ${VIGRA_IMPEX_LIBRARY_DIR})
+endif()
+
+
+
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wfatal-errors -std=c++98 -pedantic -pthread")
+SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Werror")	
+
+
+
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include/")
+
+
+ADD_LIBRARY(img2term SHARED src/img2term.cxx)
