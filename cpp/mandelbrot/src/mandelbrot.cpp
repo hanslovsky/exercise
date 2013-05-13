@@ -7,6 +7,8 @@
 #include <vigra/impex.hxx>
 #include <vigra/multi_array.hxx>
 #include <vigra/multi_iterator.hxx>
+#include <vigra/numpy_array.hxx>
+#include <vigra/numpy_array_converters.hxx>
 
 // own
 #include "mandelbrot.hxx"
@@ -138,6 +140,12 @@ void Mandelbrot::writeImage(const char *filename) const {
   exportImage(srcImageRange(grid_), vigra::ImageExportInfo(filename));
 }
 
-const vigra::MultiArray<2, ushort>& Mandelbrot::getImage() {
-  return grid_;
+const vigra::MultiArrayView<2, ushort> Mandelbrot::getImage() {
+  return vigra::MultiArrayView<2, ushort>(grid_);
+}
+
+vigra::NumpyArray<2, ushort> Mandelbrot::getImagePython(vigra::NumpyArray<2, ushort> res) {
+  res.reshapeIfEmpty(grid_.shape());
+  res = grid_;
+  return res;
 }

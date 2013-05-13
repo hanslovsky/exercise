@@ -1,14 +1,20 @@
 #ifndef MANDELBROT_HXX
 #define MANDELBROT_HXX
 
+
+#define PY_ARRAY_UNIQUE_SYMBOL my_module_PyArray_API
+#define NO_IMPORT_ARRAY
+
 // stl
 #include <iostream>
+#include <vector>
 
 //vigra
-#include <vector>
 #include <vigra/impex.hxx>
 #include <vigra/multi_array.hxx>
 #include <vigra/multi_iterator.hxx>
+#include <vigra/numpy_array.hxx>
+#include <vigra/numpy_array_converters.hxx>
 
 // own
 #include "complex.hxx"
@@ -16,6 +22,7 @@
 typedef unsigned short ushort;
 typedef vigra::MultiArray<2, ushort>::traverser Iterator2D;
 typedef vigra::StridedMultiIterator<1, ushort> Iterator1D;
+
 
 
 class Mandelbrot {
@@ -60,7 +67,8 @@ public:
   int calculateElement(Complex& z, Complex& c, int iterations, const Complex& offset);
   // bool writeToFile(const char *filename) const;
   void writeImage(const char *filename) const;
-  const vigra::MultiArray<2, ushort>& getImage();
+  const vigra::MultiArrayView<2, ushort> getImage();
+  vigra::NumpyArray<2, ushort> getImagePython(vigra::NumpyArray<2, ushort> res);
 };
 
 

@@ -1,3 +1,8 @@
+// this must define the same symbol as the main module file (numpy requirement)
+#define PY_ARRAY_UNIQUE_SYMBOL brot_pyarray
+#define NO_IMPORT_ARRAY
+
+
 #include <boost/python.hpp>
 
 #include "../include/complex.hxx"

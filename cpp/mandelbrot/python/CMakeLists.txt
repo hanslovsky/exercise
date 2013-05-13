@@ -14,9 +14,10 @@ IF (PythonLibs_FOUND OR PYTHON_LIBRARIES)
     LINK_DIRECTORIES(${PYTHON_LIBRARY_DIRS})
 endif()
 
+
 message (${Boost_LIBRARIES})
 message (${PYTHON_LIBRARIES})
 set(PYBROT_SRCS pycomplex.cxx pymandelbrot.cxx pybrot.cxx)
 add_library(pybrot SHARED ${PYBROT_SRCS})
-target_link_libraries(pybrot  ${Boost_LIBRARIES} complex mandelbrot)
+target_link_libraries(pybrot mandelbrot complex ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 set_target_properties(pybrot PROPERTIES PREFIX "" OUTPUT_NAME "mandelbrot")
