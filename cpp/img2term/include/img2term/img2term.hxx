@@ -266,6 +266,7 @@ namespace img2term {
     {}
 
     friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
+    friend class PatchArray2D;
   };
 
 
@@ -293,11 +294,15 @@ namespace img2term {
     void calculate_term_color(const ColorMatchStrategyBase& strategy);
 
     bool get_color_changed() const;
+
+    void set_term_color(TermColorType color);
+
     ImgColorType get_previous_color() const;
     ImgColorType get_current_color() const;
     TermColorType get_term_color() const;
 
     friend std::ostream& operator<<(std::ostream& os, const ImagePatch& patch);
+    friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
   };
 
 
@@ -316,6 +321,8 @@ namespace img2term {
       patches_(0)
     {}
 
+    char draw_char() const;
+    
     friend std::ostream& operator<<(std::ostream& os, const PatchArray2D& patch_array);
   };
 
