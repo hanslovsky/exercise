@@ -46,10 +46,16 @@ namespace img2term {
   class ColorMatchStrategyHSV;
 
 
+  class ColorMatchStrategyASCII;
+
+
   class CharDrawerStrategyBase;
 
 
   class CharDrawerStrategySingleChar;
+
+
+  class CharDrawerStrategyASCII;
 
 
   class DistanceStrategyBase;
@@ -128,6 +134,7 @@ namespace img2term {
       RGB_(RGB)
     {}
     const vigra::TinyVector<uint, 3>& get_RGB();
+    uint to_grayscale() const;
     friend bool operator==(const ImgColorType& c1, const ImgColorType& c2);
   };
 
@@ -198,6 +205,20 @@ namespace img2term {
   };
 
 
+  class ColorMatchStrategyASCII : public ColorMatchStrategyBase {
+  private:
+    std::vector<char> dictionary_;
+  public:
+    ColorMatchStrategyASCII() :
+      dictionary_(0)
+    {dictionary_.push_back('.'); dictionary_.push_back('#');}
+    ColorMatchStrategyASCII(std::vector<char> dictionary) :
+      dictionary_(dictionary)
+    {}
+    virtual TermColorType operator()(ImgColorType color) const;
+  };
+
+
   class CharDrawerStrategyBase {
   private:
   public:
@@ -210,6 +231,15 @@ namespace img2term {
   public:
     virtual char operator()(const CharVec& char_list);
   };
+
+
+  class CharDrawerStrategyASCII : public CharDrawerStrategyBase {
+  private:
+  public:
+    virtual char operator()(const CharVec& char_list);
+  };
+
+  
 
 
   class DistanceStrategyBase {
@@ -244,7 +274,7 @@ namespace img2term {
   public:
     OptionClass() :
       n_chars_per_column_(80),
-      color_match_strategy_(ColorMatchStrategyPtr(new ColorMatchStrategyRGB)),
+      color_match_strategy_(ColorMatchStrategyPtr(new ColorMatchStrategyASCII)),
       char_list_(CharVec(1, '#')),
       char_drawer_strategy_(CharDrawerStrategyPtr(new CharDrawerStrategySingleChar)),
       averaging_strategy_(AveragingStrategyPtr(new AveragingStrategyMean)),

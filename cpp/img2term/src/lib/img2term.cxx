@@ -5,6 +5,7 @@
 #include <numeric>
 #include <algorithm>
 #include <ostream>
+#include <iostream>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -32,6 +33,10 @@ namespace img2term {
     return c1.RGB_[0] == c2.RGB_[0] &&
       c1.RGB_[1] == c2.RGB_[1] &&
       c1.RGB_[2] == c2.RGB_[2];
+  }
+
+  uint ImgColorType::to_grayscale() const {
+    return (RGB_[0] + RGB_[1] + RGB_[2])/3;
   }
 
 
@@ -99,6 +104,17 @@ namespace img2term {
 
 
   ////
+  //// ColorMatchStrategyASCII
+  ////
+  TermColorType ColorMatchStrategyASCII::operator()(ImgColorType color) const {
+    uint index = color.to_grayscale()/256.0*dictionary_.size();
+    assert(index < dictionary_.size());
+    char tmp[2] = {dictionary_[index], '\0'};
+    return TermColorType(std::string(tmp));
+  }
+
+
+  ////
   //// CharDrawerStrategySingleChar
   ////
   char CharDrawerStrategySingleChar::operator()(const CharVec& char_list) {
@@ -124,25 +140,26 @@ namespace img2term {
   //// OptionClass
   ////
   PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options) {
-    uint Y = image.shape()[0];
-    uint X = image.shape()[1];
-    uint patch_width = std::min(X/options.n_chars_per_column_, X);
-    uint patch_height = std::min(static_cast<uint>(options.aspect_ratio_*X), Y);
+    uint Y = image.shape()[1];
+    uint X = image.shape()[0];
+    uint n_chars = std::min(options.n_chars_per_column_, X);
+    uint patch_width = X/n_chars+1;
+    uint patch_height = std::min(static_cast<uint>(options.aspect_ratio_*patch_width), Y);
     PatchArray2DPtr res(new PatchArray2D);
-    for (int x = 0; x < X; x += patch_width) {
+    for (int y = 0; y < Y; y += patch_height) {
       res->patches_.push_back(std::vector<ImagePatch>());
-      uint delta_x = std::min(patch_width, X - x);
+      uint delta_y = std::min(patch_height, Y - y);
       ImgColorType previous_color(vigra::TinyVector<uint, 3>(257, 257, 257));
       std::vector<ImagePatch>& patch_vector = *(res->patches_.end()-1);
-      for (int y = 0; y < Y; y += patch_height) {
-        uint delta_y = std::min(patch_height, Y - y);
-        patch_vector.push_back(ImagePatch(image.subarray(vigra::TinyVector<uint, 3>(y,x,0),
-                                                         vigra::TinyVector<uint,3>(y+delta_y, x+delta_x, 3)),
+      for (int x = 0; x < X; x += patch_width) {
+        uint delta_x = std::min(patch_width, X - x);
+        patch_vector.push_back(ImagePatch(image.subarray(vigra::TinyVector<uint, 3>(x,y,0),
+                                                         vigra::TinyVector<uint,3>(x+delta_x, y+delta_y, 3)),
                                           previous_color)
                                );
         ImagePatch& patch = *(patch_vector.end()-1);
         patch.calculate_current_color(*options.averaging_strategy_);
-        if (!(previous_color == patch.current_color_)) {
+        if (true || !(previous_color == patch.current_color_)) {
           patch.term_color_ = (*(options.color_match_strategy_))(patch.current_color_);
         }
         previous_color = patch.current_color_;
@@ -202,7 +219,8 @@ namespace img2term {
     std::vector<ImagePatch>::const_iterator it_1d;
     for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
       for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
-        os << *it_1d << patch_array.draw_char();
+        
+        os << *it_1d;
       }
       os << "\n";
     }
