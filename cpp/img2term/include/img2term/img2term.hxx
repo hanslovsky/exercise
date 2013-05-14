@@ -297,7 +297,7 @@ namespace img2term {
     ImgColorType get_current_color() const;
     TermColorType get_term_color() const;
 
-    friend std::ostream& operator<<(std::ostream os, const ImagePatch& patch);
+    friend std::ostream& operator<<(std::ostream& os, const ImagePatch& patch);
   };
 
 
@@ -316,7 +316,7 @@ namespace img2term {
       patches_(0)
     {}
 
-    friend std::ostream& operator<<(std::ostream os, const PatchArray2D& patch_array);
+    friend std::ostream& operator<<(std::ostream& os, const PatchArray2D& patch_array);
   };
 
 

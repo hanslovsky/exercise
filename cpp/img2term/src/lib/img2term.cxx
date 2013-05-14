@@ -175,8 +175,7 @@ namespace img2term {
   }
 
   std::ostream& operator<<(std::ostream& os, const ImagePatch& patch) {
-    // os << patch.term_color_;
-    os << patch.get_term_color();
+    os << patch.term_color_;
     return os;
   }
 
