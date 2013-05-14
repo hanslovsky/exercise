@@ -188,7 +188,6 @@ namespace img2term {
     std::vector<ImagePatch>::const_iterator it_1d;
     for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
       for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
-        // os << (*it_1d).get_term_color();
         ImagePatch p = *it_1d;
         os << p;
       }
