@@ -24,3 +24,6 @@ ADD_LIBRARY(img2term SHARED src/lib/img2term.cxx)
 ADD_EXECUTABLE(img2term_app src/bin/img2term_app.cxx)
 
 TARGET_LINK_LIBRARIES(img2term_app img2term vigraimpex)
+
+INSTALL(TARGETS img2term LIBRARY DESTINATION lib)
+INSTALL(TARGETS img2term_app RUNTIME DESTINATION bin)
