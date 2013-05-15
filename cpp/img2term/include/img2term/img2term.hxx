@@ -28,6 +28,9 @@ namespace img2term {
   class TermColorType;
 
 
+  class HSVColorType;
+
+
   class AveragingStrategyBase;
 
 
@@ -135,6 +138,7 @@ namespace img2term {
     {}
     const vigra::TinyVector<uint, 3>& get_RGB();
     uint to_grayscale() const;
+    vigra::TinyVector<double, 3> to_HSV() const;
     friend bool operator==(const ImgColorType& c1, const ImgColorType& c2);
   };
 

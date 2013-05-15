@@ -39,6 +39,39 @@ namespace img2term {
     return (RGB_[0] + RGB_[1] + RGB_[2])/3;
   }
 
+  vigra::TinyVector<double, 3> ImgColorType::to_HSV() const {
+    const double R = RGB_[0];
+    const double G = RGB_[1];
+    const double B = RGB_[2];
+    const double max = std::max(R, std::max(G, B));
+    const double min = std::min(R, std::min(G, B));
+    const double range = max - min;
+    vigra::TinyVector<double, 3> res;
+
+    // H:
+    if (max == min) {
+      res[0] = 0;
+    } else if(max == R) {
+      res[0] = 60*((G-B)/range);
+    } else if(max == G) {
+      res[0] = 60*(2 + (B-R)/range);
+    } else {
+      res[0] = 60*(4 + (R-G)/range);
+    }
+
+    // S:
+    if (max == 0) {
+      res[1] = 0;
+    } else {
+      res[1] = range/max;
+    }
+
+    // V:
+    res[2] = max;
+    
+    return res;
+  }
+
 
   ////
   //// TermColorType
