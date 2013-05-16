@@ -124,17 +124,17 @@ namespace img2term {
   ////
   //// ColorMatchStrategyRGB
   ////
-  TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color) const {
+  /* TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color) const {
     return TermColorType("NEEDS TO BE IMPLEMENTED!");
-  }
+    } */
 
 
   ////
   //// ColorMatchStrategyHSV
   ////
-  TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color) const {
+  /* TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color) const {
     return TermColorType("NEEDS TO BE IMPLEMENTED!");
-  }
+    } */
 
 
   ////
@@ -170,10 +170,10 @@ namespace img2term {
               << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
               << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
     std::string argmin_string = std::to_string(argmin);
-    return TermColorType("\033[48;05;" +
-                         argmin_string +
-                         "m\033[01;38;05;" +
-                         argmin_string + "m");    
+    return TermColorType("\033[38;05;" +
+                         argmin_string + "m");
+    // "m\033[38;05;" +
+    // argmin_string + "m");    
   }
     
 
@@ -246,7 +246,7 @@ namespace img2term {
                                );
         ImagePatch& patch = *(patch_vector.end()-1);
         patch.calculate_current_color(*options.averaging_strategy_);
-        if (true || !(previous_color == patch.current_color_)) {
+        if (!(previous_color == patch.current_color_)) {
           patch.term_color_ = (*(options.color_match_strategy_))(patch.current_color_);
         }
         previous_color = patch.current_color_;
