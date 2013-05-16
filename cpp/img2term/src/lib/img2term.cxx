@@ -16,6 +16,7 @@
 
 // own
 #include "img2term/img2term.hxx"
+#include "img2term/term_colors.hxx"
 
 
 
@@ -147,6 +148,36 @@ namespace img2term {
   }
 
 
+  TermColorType ColorMatchStrategyDistance::operator()(ImgColorType color) const {
+    uint argmin = 0;
+    double min = std::numeric_limits<double>::max();
+    uint* c_ptr = COLOR_ARR_256;
+    double curr_dist;
+    for (uint index = 0; c_ptr != COLOR_ARR_256 + 768; ++index, c_ptr+=3) {
+      ImgColorType comp_color(vigra::TinyVector<uint, 3>(*(c_ptr),
+                                                         *(c_ptr+1),
+                                                         *(c_ptr+2)
+                                                         ));
+      curr_dist = (*distance_)(color, comp_color);
+      if (curr_dist < min) {
+        min = curr_dist;
+        argmin = index;
+      }
+    }
+    /* std::cout << "argmin=" << argmin << ": "
+              << color.get_RGB()[0] << ',' << color.get_RGB()[1]
+              << ',' << color.get_RGB()[2] << " vs. "
+              << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
+              << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
+    std::string argmin_string = std::to_string(argmin);
+    return TermColorType("\e[48;05;" +
+                         argmin_string +
+                         "m\e[01;38;05;" +
+                         argmin_string + "m");    
+  }
+    
+
+
   ////
   //// CharDrawerStrategySingleChar
   ////
@@ -170,8 +201,31 @@ namespace img2term {
 
 
   ////
+  //// DistanceStrategyHSV
+  ////
+  double DistanceStrategyHSV::operator()(ImgColorType c1, ImgColorType c2) {
+    const vigra::TinyVector<double, 3> HSV_1 = c1.to_HSV();
+    const vigra::TinyVector<double, 3> HSV_2 = c2.to_HSV();
+    double squared_sum = (HSV_1[0] - HSV_2[0])*(HSV_1[0] - HSV_2[0]);
+    for (uint i = 1; i < 3; ++i) {
+      squared_sum += param_*(HSV_1[i] - HSV_2[i])*(HSV_1[i] - HSV_2[i]);
+    }
+    return squared_sum;
+  }
+
+  ////
   //// OptionClass
   ////
+  CharDrawerStrategyPtr OptionClass::get_char_drawer_strategy() const {
+    return char_drawer_strategy_;
+  }
+
+
+  char OptionClass::print_char() const {
+    return (*char_drawer_strategy_)(char_list_);
+  }
+
+
   PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options) {
     uint Y = image.shape()[1];
     uint X = image.shape()[0];
@@ -253,11 +307,12 @@ namespace img2term {
     for (it_2d = patch_array.patches_.begin(); it_2d != patch_array.patches_.end(); ++it_2d) {
       for (it_1d = it_2d->begin(); it_1d != it_2d->end(); ++it_1d) {
         
-        os << *it_1d;
+        os << *it_1d << patch_array.options_.print_char();
       }
-      os << "\n";
+      os << "\033[0m\n";
     }
     os << "\b";
+    os << "\033[0m";
     return os;
   }
   

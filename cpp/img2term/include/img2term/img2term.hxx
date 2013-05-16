@@ -52,6 +52,9 @@ namespace img2term {
   class ColorMatchStrategyASCII;
 
 
+  class ColorMatchStrategyDistance;
+
+
   class CharDrawerStrategyBase;
 
 
@@ -180,6 +183,34 @@ namespace img2term {
   };
 
 
+  class DistanceStrategyBase {
+  private:
+  public:
+    virtual double operator()(ImgColorType c1, ImgColorType c2) = 0;
+  };
+
+  
+  class DistanceStrategyRGB : public DistanceStrategyBase {
+  private:
+  public:
+    virtual double operator()(ImgColorType c1, ImgColorType c2);
+  };
+
+
+  class DistanceStrategyHSV : public DistanceStrategyBase {
+  private:
+    double param_;
+  public:
+    DistanceStrategyHSV() :
+      param_(1.0)
+    {}
+    DistanceStrategyHSV(double param) :
+      param_(param)
+    {}
+    virtual double operator()(ImgColorType c1, ImgColorType c2);
+  };
+
+
   class ColorMatchStrategyBase {
     // ColorDict dictionary_;
   public:
@@ -223,6 +254,19 @@ namespace img2term {
   };
 
 
+  class ColorMatchStrategyDistance : public ColorMatchStrategyBase {
+  private:
+    DistanceStrategyPtr distance_;
+  public:
+    ColorMatchStrategyDistance() :
+      distance_(DistanceStrategyPtr(new DistanceStrategyHSV))
+    {}
+    ColorMatchStrategyDistance(DistanceStrategyPtr distance) :
+      distance_(distance)
+    {}
+    virtual TermColorType operator()(ImgColorType color) const;
+  };
+
   class CharDrawerStrategyBase {
   private:
   public:
@@ -243,28 +287,6 @@ namespace img2term {
     virtual char operator()(const CharVec& char_list);
   };
 
-  
-
-
-  class DistanceStrategyBase {
-  private:
-  public:
-    virtual double operator()(ImgColorType c1, ImgColorType c2) = 0;
-  };
-
-  
-  class DistanceStrategyRGB : public DistanceStrategyBase {
-  private:
-  public:
-    virtual double operator()(ImgColorType c1, ImgColorType c2);
-  };
-
-
-  class DistanceStrategyHSV : public DistanceStrategyBase {
-  private:
-  public:
-    virtual double operator()(ImgColorType c1, ImgColorType c2);
-  };
 
 
   class OptionClass {
@@ -298,6 +320,9 @@ namespace img2term {
       averaging_strategy_(averaging_strategy),
       aspect_ratio_(aspect_ratio)
     {}
+
+    CharDrawerStrategyPtr get_char_drawer_strategy() const;
+    char print_char() const;
 
     friend PatchArray2DPtr PatchArray2DFactory(vigra::MultiArrayView<3, uint> image, OptionClass options);
     friend class PatchArray2D;
