@@ -170,9 +170,9 @@ namespace img2term {
               << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
               << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
     std::string argmin_string = std::to_string(argmin);
-    return TermColorType("\e[48;05;" +
+    return TermColorType("\033[48;05;" +
                          argmin_string +
-                         "m\e[01;38;05;" +
+                         "m\033[01;38;05;" +
                          argmin_string + "m");    
   }
     
@@ -233,12 +233,12 @@ namespace img2term {
     uint patch_width = X/n_chars+1;
     uint patch_height = std::min(static_cast<uint>(options.aspect_ratio_*patch_width), Y);
     PatchArray2DPtr res(new PatchArray2D);
-    for (int y = 0; y < Y; y += patch_height) {
+    for (uint y = 0; y < Y; y += patch_height) {
       res->patches_.push_back(std::vector<ImagePatch>());
       uint delta_y = std::min(patch_height, Y - y);
       ImgColorType previous_color(vigra::TinyVector<uint, 3>(257, 257, 257));
       std::vector<ImagePatch>& patch_vector = *(res->patches_.end()-1);
-      for (int x = 0; x < X; x += patch_width) {
+      for (uint x = 0; x < X; x += patch_width) {
         uint delta_x = std::min(patch_width, X - x);
         patch_vector.push_back(ImagePatch(image.subarray(vigra::TinyVector<uint, 3>(x,y,0),
                                                          vigra::TinyVector<uint,3>(x+delta_x, y+delta_y, 3)),
