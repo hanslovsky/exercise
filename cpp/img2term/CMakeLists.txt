@@ -19,10 +19,11 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Werror")
 
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include/")
 
-
-ADD_LIBRARY(img2term SHARED src/lib/img2term.cxx)
+FILE(GLOB LIB_CXX "src/lib/*.cxx")
+ADD_LIBRARY(img2term SHARED ${LIB_CXX})
 ADD_EXECUTABLE(img2term_app src/bin/img2term_app.cxx)
 
+TARGET_LINK_LIBRARIES(img2term boost_program_options)
 TARGET_LINK_LIBRARIES(img2term_app img2term vigraimpex)
 
 INSTALL(TARGETS img2term LIBRARY DESTINATION lib)

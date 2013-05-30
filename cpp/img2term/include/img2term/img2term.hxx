@@ -250,7 +250,7 @@ namespace img2term {
     ColorMatchStrategyASCII(std::vector<char> dictionary) :
       dictionary_(dictionary)
     {}
-    virtual TermColorType operator()(ImgColorType color, bool color_changed) const;
+    virtual TermColorType operator()(ImgColorType color, bool) const;
   };
 
 
@@ -259,7 +259,7 @@ namespace img2term {
     DistanceStrategyPtr distance_;
   public:
     ColorMatchStrategyDistance() :
-      distance_(DistanceStrategyPtr(new DistanceStrategyHSV))
+      distance_(DistanceStrategyPtr(new DistanceStrategyRGB))
     {}
     ColorMatchStrategyDistance(DistanceStrategyPtr distance) :
       distance_(distance)

@@ -2,6 +2,13 @@
 #define TERM_COLORS_HXX
 
 
+// #define SYMBOLS {'.', ',', ':', ';', '+', '*', '#'}
+#define SYMBOLS {' ', '.', ',', ':', ';', '+', '*', '&', '#', '%', '@'}
+
+char SYMBOL_ARRAY[] = SYMBOLS;
+uint N_SYMBOLS = sizeof(SYMBOL_ARRAY)/sizeof(char);
+
+
 uint COLOR_ARR_256[] = {
   0, 0, 0,
   205, 0, 0,

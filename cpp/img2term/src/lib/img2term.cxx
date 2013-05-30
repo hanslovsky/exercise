@@ -140,14 +140,11 @@ namespace img2term {
   ////
   //// ColorMatchStrategyASCII
   ////
-  TermColorType ColorMatchStrategyASCII::operator()(ImgColorType color, bool color_changed) const {
+  TermColorType ColorMatchStrategyASCII::operator()(ImgColorType color, bool) const {
     uint index = color.to_grayscale()/256.0*dictionary_.size();
     assert(index < dictionary_.size());
     char tmp[2] = {dictionary_[index], '\0'};
-    // if statement to avoid unused parameter warnings; will be undone by compiler optimization
-    if (color_changed || !color_changed) {
-      return TermColorType(std::string(tmp));
-    }
+    return TermColorType(std::string(tmp));
   }
 
 
@@ -168,16 +165,11 @@ namespace img2term {
           argmin = index;
         }
       }
-      /* std::cout << "argmin=" << argmin << ": "
-         << color.get_RGB()[0] << ',' << color.get_RGB()[1]
-         << ',' << color.get_RGB()[2] << " vs. "
-         << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
-         << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
       std::string argmin_string = std::to_string(argmin);
       return TermColorType("\033[38;05;" +
+                           argmin_string +
+                           "m\033[48;05;" +
                            argmin_string + "m");
-      // "m\033[38;05;" +
-      // argmin_string + "m");
     } else {
       return TermColorType("");
     }
@@ -190,6 +182,14 @@ namespace img2term {
   ////
   char CharDrawerStrategySingleChar::operator()(const CharVec& char_list) {
     return char_list[0];
+  }
+
+
+  ////
+  //// CharDrawerStrategyASCII
+  ////
+  char CharDrawerStrategyASCII::operator()(const CharVec&) {
+    return '\0';
   }
 
 
@@ -229,7 +229,8 @@ namespace img2term {
 
 
   char OptionClass::print_char() const {
-    return (*char_drawer_strategy_)(char_list_);
+    char tmp = (*char_drawer_strategy_)(char_list_);
+    return tmp;
   }
 
 
@@ -239,7 +240,7 @@ namespace img2term {
     uint n_chars = std::min(options.n_chars_per_column_, X);
     uint patch_width = X/n_chars+1;
     uint patch_height = std::min(static_cast<uint>(options.aspect_ratio_*patch_width), Y);
-    PatchArray2DPtr res(new PatchArray2D);
+    PatchArray2DPtr res(new PatchArray2D(options));
     for (uint y = 0; y < Y; y += patch_height) {
       res->patches_.push_back(std::vector<ImagePatch>());
       uint delta_y = std::min(patch_height, Y - y);
