@@ -124,7 +124,7 @@ namespace img2term {
   ////
   //// ColorMatchStrategyRGB
   ////
-  /* TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color) const {
+  /* TermColorType ColorMatchStrategyRGB::operator()(ImgColorType color, bool color_changed) const {
     return TermColorType("NEEDS TO BE IMPLEMENTED!");
     } */
 
@@ -132,7 +132,7 @@ namespace img2term {
   ////
   //// ColorMatchStrategyHSV
   ////
-  /* TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color) const {
+  /* TermColorType ColorMatchStrategyHSV::operator()(ImgColorType color, bool color_changed) const {
     return TermColorType("NEEDS TO BE IMPLEMENTED!");
     } */
 
@@ -140,40 +140,47 @@ namespace img2term {
   ////
   //// ColorMatchStrategyASCII
   ////
-  TermColorType ColorMatchStrategyASCII::operator()(ImgColorType color) const {
+  TermColorType ColorMatchStrategyASCII::operator()(ImgColorType color, bool color_changed) const {
     uint index = color.to_grayscale()/256.0*dictionary_.size();
     assert(index < dictionary_.size());
     char tmp[2] = {dictionary_[index], '\0'};
-    return TermColorType(std::string(tmp));
+    // if statement to avoid unused parameter warnings; will be undone by compiler optimization
+    if (color_changed || !color_changed) {
+      return TermColorType(std::string(tmp));
+    }
   }
 
 
-  TermColorType ColorMatchStrategyDistance::operator()(ImgColorType color) const {
-    uint argmin = 0;
-    double min = std::numeric_limits<double>::max();
-    uint* c_ptr = COLOR_ARR_256;
-    double curr_dist;
-    for (uint index = 0; c_ptr != COLOR_ARR_256 + 768; ++index, c_ptr+=3) {
-      ImgColorType comp_color(vigra::TinyVector<uint, 3>(*(c_ptr),
-                                                         *(c_ptr+1),
-                                                         *(c_ptr+2)
-                                                         ));
-      curr_dist = (*distance_)(color, comp_color);
-      if (curr_dist < min) {
-        min = curr_dist;
-        argmin = index;
+  TermColorType ColorMatchStrategyDistance::operator()(ImgColorType color, bool color_changed) const {
+    if (color_changed) {
+      uint argmin = 0;
+      double min = std::numeric_limits<double>::max();
+      uint* c_ptr = COLOR_ARR_256;
+      double curr_dist;
+      for (uint index = 0; c_ptr != COLOR_ARR_256 + 768; ++index, c_ptr+=3) {
+        ImgColorType comp_color(vigra::TinyVector<uint, 3>(*(c_ptr),
+                                                           *(c_ptr+1),
+                                                           *(c_ptr+2)
+                                                           ));
+        curr_dist = (*distance_)(color, comp_color);
+        if (curr_dist < min) {
+          min = curr_dist;
+          argmin = index;
+        }
       }
+      /* std::cout << "argmin=" << argmin << ": "
+         << color.get_RGB()[0] << ',' << color.get_RGB()[1]
+         << ',' << color.get_RGB()[2] << " vs. "
+         << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
+         << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
+      std::string argmin_string = std::to_string(argmin);
+      return TermColorType("\033[38;05;" +
+                           argmin_string + "m");
+      // "m\033[38;05;" +
+      // argmin_string + "m");
+    } else {
+      return TermColorType("");
     }
-    /* std::cout << "argmin=" << argmin << ": "
-              << color.get_RGB()[0] << ',' << color.get_RGB()[1]
-              << ',' << color.get_RGB()[2] << " vs. "
-              << COLOR_ARR_256[argmin] << ',' << COLOR_ARR_256[argmin+1]
-              << ',' << COLOR_ARR_256[argmin+2] << '\n'; */
-    std::string argmin_string = std::to_string(argmin);
-    return TermColorType("\033[38;05;" +
-                         argmin_string + "m");
-    // "m\033[38;05;" +
-    // argmin_string + "m");    
   }
     
 
@@ -246,9 +253,7 @@ namespace img2term {
                                );
         ImagePatch& patch = *(patch_vector.end()-1);
         patch.calculate_current_color(*options.averaging_strategy_);
-        if (!(previous_color == patch.current_color_)) {
-          patch.term_color_ = (*(options.color_match_strategy_))(patch.current_color_);
-        }
+        patch.term_color_ = (*(options.color_match_strategy_))(patch.current_color_, patch.get_color_changed());
         previous_color = patch.current_color_;
       }
     }
@@ -265,7 +270,7 @@ namespace img2term {
   }
 
   void ImagePatch::calculate_term_color(const ColorMatchStrategyBase& strategy) {
-    term_color_ = strategy(current_color_);
+    term_color_ = strategy(current_color_, color_changed_);
   }
 
   bool ImagePatch::get_color_changed() const {

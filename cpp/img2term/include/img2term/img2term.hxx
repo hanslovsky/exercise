@@ -214,7 +214,7 @@ namespace img2term {
   class ColorMatchStrategyBase {
     // ColorDict dictionary_;
   public:
-    virtual TermColorType operator()(ImgColorType color) const = 0;
+    virtual TermColorType operator()(ImgColorType color, bool color_changed) const = 0;
   };
 
 
@@ -225,7 +225,7 @@ namespace img2term {
     // ColorMatchStrategyRGB(ColorDict dictionary) :
     // dictionary_(dictionary)
     // {}
-    virtual TermColorType operator()(ImgColorType color) const;
+    virtual TermColorType operator()(ImgColorType color, bool color_changed) const;
   };
 
 
@@ -236,7 +236,7 @@ namespace img2term {
     //ColorMatchStrategyHSV(ColorDict dictionary) :
     // dictionary_(dictionary)
     // {}
-    virtual TermColorType operator()(ImgColorType color) const;
+    virtual TermColorType operator()(ImgColorType color, bool color_changed) const;
   };
 
 
@@ -250,7 +250,7 @@ namespace img2term {
     ColorMatchStrategyASCII(std::vector<char> dictionary) :
       dictionary_(dictionary)
     {}
-    virtual TermColorType operator()(ImgColorType color) const;
+    virtual TermColorType operator()(ImgColorType color, bool color_changed) const;
   };
 
 
@@ -264,7 +264,7 @@ namespace img2term {
     ColorMatchStrategyDistance(DistanceStrategyPtr distance) :
       distance_(distance)
     {}
-    virtual TermColorType operator()(ImgColorType color) const;
+    virtual TermColorType operator()(ImgColorType color, bool color_changed) const;
   };
 
   class CharDrawerStrategyBase {
