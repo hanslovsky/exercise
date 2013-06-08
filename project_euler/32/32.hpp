@@ -34,7 +34,6 @@ void get_set_of_pandigital_products(int* begin, int* end, std::set<int>& prods) 
       res = get_int_from_array(begin+n_max, begin+n_digits);
       if (check_product(x1, x2, res)) {
         prods.insert(res);
-        std::cout << x1 << '*' << x2 << '=' << res << '\n';
       }
     }
   } while (std::next_permutation(begin, end));
