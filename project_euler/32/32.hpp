@@ -1,7 +1,6 @@
 #ifndef EULER_32_HPP
 #define EULER_32_HPP
 
-#include <iostream>
 #include <set>
 #include <algorithm>
 
