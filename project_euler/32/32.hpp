@@ -13,7 +13,6 @@ template <typename T>
 int get_int_from_array(T* begin, T* end) {
   --end;
   --begin;
-  int n_digits = end-begin;
   int res = 0;
   for (int n = 1; end != begin; --end, n *= 10) {
     res += n*(*end);
