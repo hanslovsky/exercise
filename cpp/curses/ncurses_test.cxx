@@ -21,7 +21,9 @@ int main() {
         init_pair(color+1, COLOR_BLACK, color);
       }
       attrset(COLOR_PAIR(color+1));
-      printw("%2d: %d,%d,%d\n\r", color, R*255/1000, G*255/1000, B*255/1000);
+      std::string eol = "\t";
+      if ((color + 1) % 4 == 0) eol = "\n\r";
+      printw("%2d: %3d,%3d,%3d%s", color, R*255/1000, G*255/1000, B*255/1000, eol.c_str());
     }
   }
   getch();
