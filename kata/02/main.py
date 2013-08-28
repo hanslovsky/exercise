@@ -5,17 +5,24 @@
 
 
 def chop1(comparison, array):
+    print chop1_impl(comparison, array, 0)
+    return chop1_impl(comparison, array, 0)
+
+def chop1_impl(comparison, array, index=0):
     arr_size = len(array)
     if arr_size == 0:
         return False
     elif arr_size == 1:
-        return comparison == array[0]
+        if comparison == array[0]:
+            return index
+        else:
+            return False
     elif array[arr_size/2] > comparison:
-        return chop1(comparison, array[:arr_size/2])
+        return chop1_impl(comparison, array[:arr_size/2], index)
     elif array[arr_size/2] < comparison:
-        return chop1(comparison, array[arr_size/2:])
+        return chop1_impl(comparison, array[arr_size/2:], index + arr_size/2 + 1)
     else:
-        return True
+        return index
 
 
 def test_chop(chop_function):
@@ -28,16 +35,16 @@ def test_chop(chop_function):
 
     assert chop_function(-1, arr2) == False
     assert chop_function(0, arr2) == False
-    assert chop_function(1, arr2) == True
+    assert chop_function(1, arr2) == 0
     assert chop_function(4, arr2) == False
-    assert chop_function(5, arr2) == True
+    assert chop_function(5, arr2) == 2
 
     assert chop_function(-1, arr3) == False
     assert chop_function(0, arr3) == False
-    assert chop_function(1, arr3) == True
+    assert chop_function(1, arr3) == 0
     assert chop_function(4, arr3) == False
-    assert chop_function(5, arr3) == True
-    assert chop_function(7, arr3) == True
+    assert chop_function(5, arr3) == 2
+    assert chop_function(7, arr3) == 3
 
     print "Test success!"
 
